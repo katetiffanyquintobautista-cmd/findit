@@ -31,7 +31,7 @@ class UserPreferences(models.Model):
     accent_color = models.CharField(max_length=7, default='#ff6b9e')
     font_size = models.CharField(max_length=10, choices=FONT_SIZE_CHOICES, default='medium')
     dashboard_layout = models.CharField(max_length=10, choices=LAYOUT_CHOICES, default='grid')
-    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+    profile_picture = models.ImageField(upload_to=user_profile_picture_path, blank=True, null=True)
     
     def __str__(self):
         return f"{self.user.username}'s preferences"

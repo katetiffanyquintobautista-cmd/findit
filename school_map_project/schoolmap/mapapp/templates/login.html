@@ -188,6 +188,94 @@
                 padding: 1.5rem;
             }
         }
+        
+
+        
+        /* 425x768 Viewport Optimization */
+        @media (max-width: 425px) {
+            body {
+                flex-direction: column !important;
+                min-height: 100vh !important;
+            }
+            
+            .left-section {
+                padding: 1rem !important;
+                min-height: auto !important;
+                flex: none !important;
+            }
+            
+            .logo {
+                width: 50px !important;
+                height: 50px !important;
+            }
+            
+            .logo-text {
+                font-size: 1.5rem !important;
+            }
+            
+            .description {
+                font-size: 0.8rem !important;
+                max-width: 300px !important;
+                line-height: 1.4 !important;
+            }
+            
+            .right-section {
+                padding: 1rem !important;
+                flex: 1 !important;
+            }
+            
+            .login-container {
+                max-width: 100% !important;
+                padding: 1.5rem !important;
+                margin: 0 !important;
+                border-radius: 15px !important;
+            }
+            
+            .login-header h1 {
+                font-size: 1.5rem !important;
+                margin-bottom: 0.3rem !important;
+            }
+            
+            .login-header p {
+                font-size: 0.8rem !important;
+            }
+            
+            .form-group {
+                margin-bottom: 1rem !important;
+            }
+            
+            .form-group label {
+                font-size: 0.9rem !important;
+                margin-bottom: 0.3rem !important;
+            }
+            
+            .form-group input {
+                padding: 0.6rem 0.8rem !important;
+                font-size: 0.9rem !important;
+                border-radius: 8px !important;
+            }
+            
+            .login-btn {
+                padding: 0.7rem !important;
+                font-size: 0.9rem !important;
+                border-radius: 8px !important;
+                margin-bottom: 1rem !important;
+            }
+            
+            .forgot-password {
+                margin-bottom: 1rem !important;
+            }
+            
+            .forgot-password a {
+                font-size: 0.8rem !important;
+            }
+            
+            .register-link {
+                font-size: 0.8rem !important;
+            }
+            
+
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -242,105 +330,8 @@
                 <div class="register-link">
                     Don't have an account? <a href="{% url 'register' %}">Register here</a>
                 </div>
-                <div class="back-to-map">
-                    <a href="/app/"><i class="fas fa-arrow-left"></i> Back to Map</a>
-                </div>
             </form>
         </div>
     </div>
 </body>
 </html>
-/* 425x768 Viewport Optimization */
-@media (max-width: 425px) {
-    body {
-        flex-direction: column !important;
-        min-height: 100vh !important;
-    }
-    
-    .left-section {
-        padding: 1rem !important;
-        min-height: auto !important;
-        flex: none !important;
-    }
-    
-    .logo {
-        width: 50px !important;
-        height: 50px !important;
-    }
-    
-    .logo-text {
-        font-size: 1.5rem !important;
-    }
-    
-    .description {
-        font-size: 0.8rem !important;
-        max-width: 300px !important;
-        line-height: 1.4 !important;
-    }
-    
-    .right-section {
-        padding: 1rem !important;
-        flex: 1 !important;
-    }
-    
-    .login-container {
-        max-width: 100% !important;
-        padding: 1.5rem !important;
-        margin: 0 !important;
-        border-radius: 15px !important;
-    }
-    
-    .login-header h1 {
-        font-size: 1.5rem !important;
-        margin-bottom: 0.3rem !important;
-    }
-    
-    .login-header p {
-        font-size: 0.8rem !important;
-    }
-    
-    .form-group {
-        margin-bottom: 1rem !important;
-    }
-    
-    .form-group label {
-        font-size: 0.9rem !important;
-        margin-bottom: 0.3rem !important;
-    }
-    
-    .form-group input {
-        padding: 0.6rem 0.8rem !important;
-        font-size: 0.9rem !important;
-        border-radius: 8px !important;
-    }
-    
-    .login-btn {
-        padding: 0.7rem !important;
-        font-size: 0.9rem !important;
-        border-radius: 8px !important;
-        margin-bottom: 1rem !important;
-    }
-    
-    .forgot-password {
-        margin-bottom: 1rem !important;
-    }
-    
-    .forgot-password a {
-        font-size: 0.8rem !important;
-    }
-    
-    .register-link {
-        font-size: 0.8rem !important;
-    }
-    
-    .back-to-map {
-        text-align: center !important;
-        margin-top: 1rem !important;
-    }
-    
-    .back-to-map a {
-        font-size: 0.8rem !important;
-        color: #ff6b9e !important;
-        text-decoration: none !important;
-    }
-}

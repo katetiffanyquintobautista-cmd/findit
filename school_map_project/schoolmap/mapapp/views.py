@@ -54,12 +54,23 @@ def profile(request):
     preferences, created = UserPreferences.objects.get_or_create(user=user)
     
     if request.method == 'POST':
-        # Handle profile picture upload
+        # Handle AJAX profile picture upload
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            if 'profile_picture' in request.FILES:
+                preferences.profile_picture = request.FILES['profile_picture']
+                preferences.save()
+                return JsonResponse({'success': True, 'message': 'Profile picture updated successfully!'})
+            else:
+                return JsonResponse({'success': False, 'error': 'No file provided'})
+        
+        # Handle regular form submission
         if 'profile_picture' in request.FILES:
             preferences.profile_picture = request.FILES['profile_picture']
             preferences.save()
             messages.success(request, 'Profile picture updated successfully!')
-            return redirect('profile')
+        else:
+            messages.success(request, 'Profile updated successfully!')
+        return redirect('profile')
     
     context = {
         'user': user,

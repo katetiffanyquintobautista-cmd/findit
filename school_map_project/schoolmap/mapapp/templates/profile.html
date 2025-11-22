@@ -326,15 +326,14 @@
         <div class="profile-header">
             <div class="profile-avatar" id="profileAvatar">
                 {% if preferences.profile_picture %}
-                    <img src="{{ preferences.profile_picture.url }}" alt="Profile Picture" id="profileImage">
+                    <img src="{{ preferences.profile_picture.url }}" alt="Profile Picture" id="profileImage" onerror="this.style.display='none'; document.querySelector('.avatar-initials').style.display='flex';">
                 {% else %}
-                    <div class="avatar-initials">
+                    <div class="avatar-initials" style="{% if preferences.profile_picture %}display: none;{% else %}display: flex;{% endif %}">
                         {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
                     </div>
                 {% endif %}
-                <div class="profile-upload">
+                <div class="profile-upload" onclick="document.getElementById('profilePictureInput').click()">
                     <i class="fas fa-camera"></i>
-                    <input type="file" id="profilePictureInput" name="profile_picture" accept="image/*">
                 </div>
             </div>
             <div style="flex-grow: 1;">
@@ -374,6 +373,7 @@
         
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
+            <input type="file" id="profilePictureInput" name="profile_picture" accept="image/*" style="display: none;">
             
             <div class="profile-content">
                 <!-- Basic Information -->
@@ -658,69 +658,55 @@
         
         }); // End of DOMContentLoaded
 
-        // Profile picture upload and form submission
+        // Profile picture upload with AJAX
         const profilePictureInput = document.getElementById('profilePictureInput');
         
         if (profilePictureInput) {
-            // Create a hidden form for the profile picture upload
-            const uploadForm = document.createElement('form');
-            uploadForm.method = 'post';
-            uploadForm.enctype = 'multipart/form-data';
-            uploadForm.style.display = 'none';
-            
-            // Add CSRF token
-            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = 'csrfmiddlewaretoken';
-            csrfInput.value = csrfToken;
-            uploadForm.appendChild(csrfInput);
-            
-            // Add the file input to the hidden form
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.name = 'profile_picture';
-            fileInput.accept = 'image/*';
-            fileInput.id = 'tempFileInput';
-            fileInput.style.display = 'none';
-            uploadForm.appendChild(fileInput);
-            
-            // Add the form to the document
-            document.body.appendChild(uploadForm);
-            
-            // When clicking the profile upload button, trigger the file input
-            document.querySelector('.profile-upload').addEventListener('click', function(e) {
-                e.preventDefault();
-                fileInput.click();
-            });
-            
-            // When a file is selected, update the preview and submit the form
-            fileInput.addEventListener('change', function() {
+            profilePictureInput.addEventListener('change', function() {
                 if (this.files && this.files[0]) {
+                    const formData = new FormData();
+                    formData.append('profile_picture', this.files[0]);
+                    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+                    
+                    // Show preview immediately
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        // Update the preview
                         const avatar = document.querySelector('.profile-avatar');
                         const existingImg = avatar.querySelector('img');
                         if (existingImg) {
                             existingImg.src = e.target.result;
                         } else {
+                            const initials = avatar.querySelector('.avatar-initials');
+                            if (initials) initials.style.display = 'none';
+                            
                             const img = document.createElement('img');
                             img.src = e.target.result;
                             img.alt = 'Profile Picture';
                             img.id = 'profileImage';
-                            avatar.innerHTML = '';
-                            avatar.appendChild(img);
-                            const uploadDiv = document.createElement('div');
-                            uploadDiv.className = 'profile-upload';
-                            uploadDiv.innerHTML = '<i class="fas fa-camera"></i>';
-                            avatar.appendChild(uploadDiv);
+                            avatar.insertBefore(img, avatar.querySelector('.profile-upload'));
                         }
                     };
                     reader.readAsDataURL(this.files[0]);
                     
-                    // Submit the form
-                    uploadForm.submit();
+                    // Upload via AJAX
+                    fetch(window.location.href, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Profile picture uploaded successfully');
+                        } else {
+                            console.error('Upload failed:', data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
                 }
             });
         }

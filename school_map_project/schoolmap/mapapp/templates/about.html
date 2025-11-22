@@ -101,7 +101,7 @@
             <!-- Poster Display -->
             {% if active_poster and active_poster.poster_image %}
                 <div class="poster-display">
-                    <img src="{{ active_poster.poster_image.url }}" alt="{{ active_poster.title }}" class="poster-image">
+                    <img src="{% if active_poster.poster_image.url %}{{ active_poster.poster_image.url }}{% else %}{% static 'img/placeholder.png' %}{% endif %}" alt="{{ active_poster.title }}" class="poster-image" onerror="this.src='{% static 'img/placeholder.png' %}'">
                     <p class="poster-title">{{ active_poster.title }}</p>
                 </div>
             {% endif %}
@@ -123,9 +123,9 @@
                     <div class="video-display">
                         <h3>Campus Video Tour</h3>
                         <div class="video-container">
-                            <video controls>
-                                <source src="{{ active_poster.video_file.url }}" type="video/mp4">
-                                Your browser does not support the video tag.
+                            <video controls preload="metadata">
+                                <source src="{% if active_poster.video_file.url %}{{ active_poster.video_file.url }}{% else %}#{% endif %}" type="video/mp4">
+                                <p>Your browser does not support the video tag.</p>
                             </video>
                         </div>
                     </div>

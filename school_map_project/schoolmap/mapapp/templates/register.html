@@ -16,22 +16,24 @@
         input[type="email"],
         input[type="password"],
         select {
-            width: 100%;
-            padding: 0.8rem 1.2rem;
-            border: 2px solid #ffcce0; /* Lighter pink border */
-            border-radius: 12px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            outline: none;
-            background-color: #fff9fb; /* Very light pink background */
+            width: 100% !important;
+            padding: 0.8rem 1.2rem !important;
+            border: 2px solid #ffcce0 !important;
+            border-radius: 12px !important;
+            font-size: 1rem !important;
+            transition: all 0.3s ease !important;
+            outline: none !important;
+            background-color: #fff !important;
+            box-sizing: border-box !important;
+            display: block !important;
         }
         
         input[type="text"]:focus,
         input[type="email"]:focus,
         input[type="password"]:focus,
         select:focus {
-            border-color: #ff6b9e;
-            box-shadow: 0 0 0 3px rgba(255, 107, 158, 0.2);
+            border-color: #ff6b9e !important;
+            box-shadow: 0 0 0 3px rgba(255, 107, 158, 0.2) !important;
         }
         
         .errorlist {
@@ -271,6 +273,110 @@
                 padding: 1.5rem;
             }
         }
+        
+        /* 425x768 Viewport Optimization */
+        @media (max-width: 425px) {
+            body {
+                flex-direction: column !important;
+                min-height: 100vh !important;
+            }
+            
+            .left-section {
+                padding: 1rem !important;
+                min-height: auto !important;
+                flex: none !important;
+            }
+            
+            .logo {
+                width: 80px !important;
+                height: 80px !important;
+            }
+            
+            .logo-text {
+                font-size: 1.5rem !important;
+            }
+            
+            .description {
+                font-size: 0.8rem !important;
+                max-width: 300px !important;
+                line-height: 1.4 !important;
+            }
+            
+            .right-section {
+                padding: 1rem !important;
+                flex: 1 !important;
+            }
+            
+            .register-container {
+                max-width: 100% !important;
+                padding: 1.5rem !important;
+                margin: 0 !important;
+                border-radius: 15px !important;
+            }
+            
+            .register-header h1 {
+                font-size: 1.5rem !important;
+                margin-bottom: 0.3rem !important;
+            }
+            
+            .register-header p {
+                font-size: 0.8rem !important;
+            }
+            
+            .user-type-tabs {
+                gap: 0.5rem !important;
+                margin-bottom: 1.5rem !important;
+            }
+            
+            .tab-btn {
+                padding: 0.4rem 1rem !important;
+                font-size: 0.8rem !important;
+                border-radius: 15px !important;
+            }
+            
+            .user-type-label {
+                font-size: 0.8rem !important;
+                padding: 0.2rem 0.8rem !important;
+                margin-bottom: 0.8rem !important;
+            }
+            
+            .form-group {
+                margin-bottom: 1rem !important;
+            }
+            
+            .form-group label {
+                font-size: 0.9rem !important;
+                margin-bottom: 0.3rem !important;
+            }
+            
+            .form-group input,
+            .form-group select {
+                padding: 0.6rem 0.8rem !important;
+                font-size: 0.9rem !important;
+                border-radius: 8px !important;
+            }
+            
+            .password-note {
+                font-size: 0.75rem !important;
+            }
+            
+            .register-btn {
+                padding: 0.7rem !important;
+                font-size: 0.9rem !important;
+                border-radius: 8px !important;
+                margin-top: 0.8rem !important;
+            }
+            
+            .login-link {
+                font-size: 0.8rem !important;
+                margin-top: 1rem !important;
+            }
+            
+            .error {
+                font-size: 0.75rem !important;
+            }
+            
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -317,7 +423,7 @@
                     <input type="hidden" name="student_submit" value="1">
                     <div class="form-group">
                         <label for="id_username">Username</label>
-                        {{ student_form.username }}
+                        <input type="text" name="username" id="id_username" placeholder="Enter your username" required>
                         {% if student_form.username.errors %}
                             <div class="error">{{ student_form.username.errors }}</div>
                         {% endif %}
@@ -325,7 +431,7 @@
                     
                     <div class="form-group">
                         <label for="id_full_name">Full Name</label>
-                        {{ student_form.full_name }}
+                        <input type="text" name="full_name" id="id_full_name" placeholder="Enter your full name" required>
                         {% if student_form.full_name.errors %}
                             <div class="error">{{ student_form.full_name.errors }}</div>
                         {% endif %}
@@ -333,7 +439,7 @@
                     
                     <div class="form-group">
                         <label for="id_lrn">LRN (Learner Reference Number)</label>
-                        {{ student_form.lrn }}
+                        <input type="text" name="lrn" id="id_lrn" placeholder="Enter your LRN" required>
                         {% if student_form.lrn.errors %}
                             <div class="error">{{ student_form.lrn.errors }}</div>
                         {% endif %}
@@ -341,7 +447,17 @@
                     
                     <div class="form-group">
                         <label for="id_grade_section">Grade Level - Section</label>
-                        {{ student_form.grade_section }}
+                        <select name="grade_section" id="id_grade_section" required>
+                            <option value="">Select Grade & Section</option>
+                            <option value="Grade 7-A">Grade 7-A</option>
+                            <option value="Grade 7-B">Grade 7-B</option>
+                            <option value="Grade 8-A">Grade 8-A</option>
+                            <option value="Grade 8-B">Grade 8-B</option>
+                            <option value="Grade 9-A">Grade 9-A</option>
+                            <option value="Grade 9-B">Grade 9-B</option>
+                            <option value="Grade 10-A">Grade 10-A</option>
+                            <option value="Grade 10-B">Grade 10-B</option>
+                        </select>
                         {% if student_form.grade_section.errors %}
                             <div class="error">{{ student_form.grade_section.errors }}</div>
                         {% endif %}
@@ -349,7 +465,7 @@
                     
                     <div class="form-group">
                         <label for="id_email">Email Address</label>
-                        {{ student_form.email }}
+                        <input type="email" name="email" id="id_email" placeholder="Enter your email" required>
                         {% if student_form.email.errors %}
                             <div class="error">{{ student_form.email.errors }}</div>
                         {% endif %}
@@ -357,7 +473,7 @@
                     
                     <div class="form-group">
                         <label for="id_password1">Password</label>
-                        {{ student_form.password1 }}
+                        <input type="password" name="password1" id="id_password1" placeholder="Enter your password" required>
                         <p class="password-note">Password must be at least 8 characters long</p>
                         {% if student_form.password1.errors %}
                             <div class="error">{{ student_form.password1.errors }}</div>
@@ -366,7 +482,7 @@
                     
                     <div class="form-group">
                         <label for="id_password2">Confirm Password</label>
-                        {{ student_form.password2 }}
+                        <input type="password" name="password2" id="id_password2" placeholder="Confirm your password" required>
                         {% if student_form.password2.errors %}
                             <div class="error">{{ student_form.password2.errors }}</div>
                         {% endif %}
@@ -383,48 +499,58 @@
                     {% csrf_token %}
                     <input type="hidden" name="teacher_submit" value="1">
                     <div class="form-group">
-                        <label for="id_username">Username</label>
-                        {{ teacher_form.username }}
+                        <label for="teacher_username">Username</label>
+                        <input type="text" name="username" id="teacher_username" placeholder="Enter your username" required>
                         {% if teacher_form.username.errors %}
                             <div class="error">{{ teacher_form.username.errors }}</div>
                         {% endif %}
                     </div>
                     
                     <div class="form-group">
-                        <label for="id_full_name">Full Name</label>
-                        {{ teacher_form.full_name }}
+                        <label for="teacher_full_name">Full Name</label>
+                        <input type="text" name="full_name" id="teacher_full_name" placeholder="Enter your full name" required>
                         {% if teacher_form.full_name.errors %}
                             <div class="error">{{ teacher_form.full_name.errors }}</div>
                         {% endif %}
                     </div>
                     
                     <div class="form-group">
-                        <label for="id_faculty_id">Faculty ID Number</label>
-                        {{ teacher_form.faculty_id }}
+                        <label for="teacher_faculty_id">Faculty ID Number</label>
+                        <input type="text" name="faculty_id" id="teacher_faculty_id" placeholder="Enter your faculty ID" required>
                         {% if teacher_form.faculty_id.errors %}
                             <div class="error">{{ teacher_form.faculty_id.errors }}</div>
                         {% endif %}
                     </div>
                     
                     <div class="form-group">
-                        <label for="id_department">Department</label>
-                        {{ teacher_form.department }}
+                        <label for="teacher_department">Department</label>
+                        <select name="department" id="teacher_department" required>
+                            <option value="">Select Department</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Science">Science</option>
+                            <option value="English">English</option>
+                            <option value="Filipino">Filipino</option>
+                            <option value="Social Studies">Social Studies</option>
+                            <option value="Physical Education">Physical Education</option>
+                            <option value="Arts">Arts</option>
+                            <option value="Technology">Technology</option>
+                        </select>
                         {% if teacher_form.department.errors %}
                             <div class="error">{{ teacher_form.department.errors }}</div>
                         {% endif %}
                     </div>
                     
                     <div class="form-group">
-                        <label for="id_email">Email Address</label>
-                        {{ teacher_form.email }}
+                        <label for="teacher_email">Email Address</label>
+                        <input type="email" name="email" id="teacher_email" placeholder="Enter your email" required>
                         {% if teacher_form.email.errors %}
                             <div class="error">{{ teacher_form.email.errors }}</div>
                         {% endif %}
                     </div>
                     
                     <div class="form-group">
-                        <label for="id_password1">Password</label>
-                        {{ teacher_form.password1 }}
+                        <label for="teacher_password1">Password</label>
+                        <input type="password" name="password1" id="teacher_password1" placeholder="Enter your password" required>
                         <p class="password-note">Password must be at least 8 characters long</p>
                         {% if teacher_form.password1.errors %}
                             <div class="error">{{ teacher_form.password1.errors }}</div>
@@ -432,8 +558,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="id_password2">Confirm Password</label>
-                        {{ teacher_form.password2 }}
+                        <label for="teacher_password2">Confirm Password</label>
+                        <input type="password" name="password2" id="teacher_password2" placeholder="Confirm your password" required>
                         {% if teacher_form.password2.errors %}
                             <div class="error">{{ teacher_form.password2.errors }}</div>
                         {% endif %}
