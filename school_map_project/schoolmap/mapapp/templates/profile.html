@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - FINDIT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #ff6b9e;
+            --secondary-color: #a78bfa;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+            --gray-color: #94a3b8;
+            --border-color: #e2e8f0;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .back-button i {
+            margin-right: 0.5rem;
+        }
+
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            position: relative;
+            overflow: hidden;
+            border: 4px solid white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .avatar-initials {
+            font-size: 3rem;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+        }
+        
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .alert-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 0.5rem;
+            color: inherit;
+        }
+
+        .profile-upload {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid white;
+        }
+
+        .profile-info h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0.25rem;
+            color: var(--dark-color);
+        }
+
+        .profile-role {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .profile-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-header i {
+            color: var(--primary-color);
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+        }
+
+        .card-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 107, 158, 0.2);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #f43f5e;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .profile-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Dark mode styles */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #0f172a;
+                color: #e2e8f0;
+            }
+
+            .card {
+                background-color: #1e293b;
+                color: #e2e8f0;
+            }
+
+            .form-control {
+                background-color: #334155;
+                border-color: #475569;
+                color: #e2e8f0;
+            }
+
+            .form-control:focus {
+                background-color: #334155;
+                border-color: var(--primary-color);
+            }
+
+            .btn-outline {
+                border-color: #475569;
+                color: #e2e8f0;
+            }
+
+            .btn-outline:hover {
+                background-color: #334155;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'home' %}" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
+
+        <div class="profile-header">
+            <div class="profile-avatar" id="profileAvatar">
+                {% if preferences.profile_picture %}
+                    <img src="{{ preferences.profile_picture.url }}" alt="Profile Picture" id="profileImage">
+                {% else %}
+                    <div class="avatar-initials">
+                        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                    </div>
+                {% endif %}
+                <div class="profile-upload">
+                    <i class="fas fa-camera"></i>
+                    <input type="file" id="profilePictureInput" name="profile_picture" accept="image/*">
+                </div>
+            </div>
+            <div style="flex-grow: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1>{{ user.get_full_name|default:user.username }}</h1>
+                        <span class="profile-role">
+                            <i class="fas {% if profile.role == 'teacher' %}fa-chalkboard-teacher{% else %}fa-user-graduate{% endif %}"></i>
+                            Student
+                        </span>
+                    </div>
+                    <div class="settings-menu" style="position: relative;">
+                        <button class="settings-toggle" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; color: var(--dark-color);">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <div class="settings-dropdown" style="display: none; position: absolute; right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-width: 200px; z-index: 1000;">
+                            <a href="{% url 'profile' %}" style="display: block; padding: 10px 15px; color: var(--dark-color); text-decoration: none; border-bottom: 1px solid #eee;">
+                                <i class="fas fa-user"></i> My Profile
+                            </a>
+                            <a href="{% url 'settings' %}" class="dropdown-item settings-link" style="display: block; padding: 10px 15px; color: var(--dark-color); text-decoration: none;">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="profile-content">
+                <!-- Basic Information -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-id-card"></i>
+                        <h2>Basic Information</h2>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" class="form-control" value="{{ user.get_full_name }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" class="form-control" value="{{ user.username }}" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="role">Role</label>
+                            <input type="text" id="role" class="form-control" value="Student" disabled>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="idNumber">ID Number</label>
+                            <input type="text" id="idNumber" class="form-control" value="123456789012" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-address-book"></i>
+                        <h2>Contact Information</h2>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" class="form-control" value="{{ user.email }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" value="">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="section">Section / Department</label>
+                        <input type="text" id="section" class="form-control" value="12-ABM">
+                    </div>
+                </div>
+
+                <!-- Academic Information -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h2>Academic Information</h2>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="gradeLevel">Grade Level</label>
+                            <input type="text" id="gradeLevel" class="form-control" value="Grade 12">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="strand">Strand</label>
+                            <input type="text" id="strand" class="form-control" value="ABM">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adviser">Adviser's Name</label>
+                        <input type="text" id="adviser" class="form-control" value="Ms. Maria Santos">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="building">Building</label>
+                        <input type="text" id="building" class="form-control" value="Senior High School Building">
+                    </div>
+                </div>
+
+                <!-- Account Settings -->
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-cog"></i>
+                        <h2>Account Settings</h2>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="currentPassword">Current Password</label>
+                        <input type="password" id="currentPassword" class="form-control" placeholder="Enter current password">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" class="form-control" placeholder="Enter new password">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm new password">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="theme-toggle">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="slider"></span>
+                            <span style="margin-left: 2.5rem;">Dark Mode</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button type="button" class="btn btn-outline">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Alert close button and dropdown functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Close alert messages
+            const alertCloseButtons = document.querySelectorAll('.alert .close');
+            alertCloseButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    this.closest('.alert').style.display = 'none';
+                });
+            });
+            
+            // Initialize tooltips
+            const tooltipTriggers = document.querySelectorAll('[data-tooltip]');
+            tooltipTriggers.forEach(trigger => {
+                trigger.addEventListener('mouseenter', showTooltip);
+                trigger.addEventListener('mouseleave', hideTooltip);
+            });
+            
+            // Profile picture preview
+            const profilePicInput = document.getElementById('profile_picture');
+            const profilePicPreview = document.getElementById('profile-preview');
+            
+            if (profilePicInput && profilePicPreview) {
+                profilePicInput.addEventListener('change', function(e) {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            profilePicPreview.src = e.target.result;
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+            // Close alert when clicking the close button
+            document.querySelectorAll('.close').forEach(button => {
+                button.addEventListener('click', function() {
+                    this.closest('.alert').style.display = 'none';
+                });
+            });
+            
+            // Show tooltip
+            function showTooltip(e) {
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = this.getAttribute('data-tooltip');
+                document.body.appendChild(tooltip);
+                
+                const rect = this.getBoundingClientRect();
+                tooltip.style.top = `${rect.bottom + window.scrollY + 5}px`;
+                tooltip.style.left = `${rect.left + window.scrollX}px`;
+                
+                this._tooltip = tooltip;
+            }
+            
+            // Hide tooltip
+            function hideTooltip() {
+                if (this._tooltip) {
+                    this._tooltip.remove();
+                    this._tooltip = null;
+                }
+            }
+            
+            // Close dropdown when clicking outside
+            function closeDropdown() {
+                const dropdowns = document.querySelectorAll('.dropdown-menu');
+                dropdowns.forEach(dropdown => {
+                    if (dropdown.classList.contains('show')) {
+                        dropdown.classList.remove('show');
+                    }
+                });
+            }
+            
+            // Settings dropdown toggle
+            const settingsToggle = document.querySelector('.settings-toggle');
+            const settingsMenu = document.querySelector('.settings-menu');
+            const settingsDropdown = document.querySelector('.settings-dropdown');
+            const dropdownLinks = document.querySelectorAll('.settings-dropdown a');
+            
+            function closeDropdown() {
+                // Animate out before hiding
+                settingsDropdown.style.opacity = '0';
+                settingsDropdown.style.transform = 'translateY(-10px)';
+                // Hide after animation completes
+                setTimeout(() => {
+                    settingsDropdown.style.display = 'none';
+                }, 200);
+            }
+            
+            if (settingsToggle && settingsMenu) {
+                settingsToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Toggle dropdown visibility
+                    const isVisible = settingsDropdown.style.display === 'block';
+                    settingsDropdown.style.display = isVisible ? 'none' : 'block';
+                    
+                    // Add animation
+                    if (!isVisible) {
+                        settingsDropdown.style.opacity = '0';
+                        settingsDropdown.style.transform = 'translateY(-10px)';
+                        // Trigger reflow
+                        void settingsDropdown.offsetWidth;
+                        // Animate in
+                        settingsDropdown.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+                        settingsDropdown.style.opacity = '1';
+                        settingsDropdown.style.transform = 'translateY(0)';
+                    }
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!settingsMenu.contains(e.target) && e.target !== settingsToggle) {
+                        closeDropdown();
+                    }
+                });
+                
+                // Handle clicks on dropdown links
+                dropdownLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        // Close dropdown when a link is clicked
+                        closeDropdown();
+                        // Allow default link behavior
+                        return true;
+                    });
+                });
+            }
+
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        // Check for saved user preference, if any, on load
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme === 'dark' || (!currentTheme && prefersDarkScheme.matches)) {
+            document.body.classList.add('dark-mode');
+            if (darkModeToggle) darkModeToggle.checked = true;
+        }
+        
+        // Listen for toggle changes
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+        }
+        
+        }); // End of DOMContentLoaded
+
+        // Profile picture upload and form submission
+        const profilePictureInput = document.getElementById('profilePictureInput');
+        
+        if (profilePictureInput) {
+            // Create a hidden form for the profile picture upload
+            const uploadForm = document.createElement('form');
+            uploadForm.method = 'post';
+            uploadForm.enctype = 'multipart/form-data';
+            uploadForm.style.display = 'none';
+            
+            // Add CSRF token
+            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = csrfToken;
+            uploadForm.appendChild(csrfInput);
+            
+            // Add the file input to the hidden form
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.name = 'profile_picture';
+            fileInput.accept = 'image/*';
+            fileInput.id = 'tempFileInput';
+            fileInput.style.display = 'none';
+            uploadForm.appendChild(fileInput);
+            
+            // Add the form to the document
+            document.body.appendChild(uploadForm);
+            
+            // When clicking the profile upload button, trigger the file input
+            document.querySelector('.profile-upload').addEventListener('click', function(e) {
+                e.preventDefault();
+                fileInput.click();
+            });
+            
+            // When a file is selected, update the preview and submit the form
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Update the preview
+                        const avatar = document.querySelector('.profile-avatar');
+                        const existingImg = avatar.querySelector('img');
+                        if (existingImg) {
+                            existingImg.src = e.target.result;
+                        } else {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.alt = 'Profile Picture';
+                            img.id = 'profileImage';
+                            avatar.innerHTML = '';
+                            avatar.appendChild(img);
+                            const uploadDiv = document.createElement('div');
+                            uploadDiv.className = 'profile-upload';
+                            uploadDiv.innerHTML = '<i class="fas fa-camera"></i>';
+                            avatar.appendChild(uploadDiv);
+                        }
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                    
+                    // Submit the form
+                    uploadForm.submit();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

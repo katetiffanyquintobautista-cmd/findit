@@ -1,0 +1,313 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CampusNavigator: Your Campus Guide{% endblock %}
+
+{% block content %}
+<div class="landing-container">
+    <header class="landing-header">
+        <div class="logo-container">
+            <div class="logo-wrapper">
+                <img src="{% static 'img/logo.png' %}" alt="CampusNavigator Logo" class="campus-logo">
+                <h1>CampusNavigator</h1>
+            </div>
+            <p class="tagline">Your Guide to Everything Academic</p>
+        </div>
+    </header>
+
+    <main class="landing-content">
+        <section class="hero">
+            <h2>What is CampusNavigator?</h2>
+            <p class="lead">
+                CampusNavigator is the essential mobile and web platform designed to streamline your daily life on campus. 
+                Whether you're a student rushing to class, a faculty member needing to connect, or a visitor trying to find 
+                your way, our system puts all the information you need right at your fingertips.
+            </p>
+            <p>
+                We replace bulky paper schedules and confusing campus signs with a unified, instant digital experience, 
+                saving you time and reducing stress.
+            </p>
+        </section>
+
+        <section class="features">
+            <h2><i class="fas fa-star"></i> Key Benefits & Features</h2>
+            <p class="subtitle">CampusNavigator is built to make your academic journey simpler and more organized.</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-map-marked-alt"></i></div>
+                    <h3>Interactive Campus Map</h3>
+                    <p>A dynamic, searchable map of all campus buildings, departments, and points of interest.</p>
+                    <div class="benefit">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Never get lost finding your next lecture or office.</span>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-building"></i></div>
+                    <h3>Building Search & Details</h3>
+                    <p>Look up specific buildings to see floor plans, room numbers, and facility info.</p>
+                    <div class="benefit">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Find your destination quickly within any building.</span>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <h3>Personal Schedule</h3>
+                    <p>View your current, weekly, and future class schedules in a clean, calendar-style format.</p>
+                    <div class="benefit">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Stay on top of your classes without multiple sources.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mission">
+            <h2><i class="fas fa-bullseye"></i> Our Mission</h2>
+            <p class="mission-statement">
+                To foster a more connected, efficient, and navigable campus community by providing powerful, 
+                user-friendly digital tools that empower every member to succeed.
+            </p>
+        </section>
+
+        <section class="cta">
+            <h2>Ready to Explore?</h2>
+            <p>Get started with CampusNavigator today and experience a better way to navigate campus life.</p>
+        </section>
+    </main>
+
+    <footer class="landing-footer">
+        <!-- Footer content removed -->
+    </footer>
+</div>
+
+<style>
+    /* Base Styles */
+    :root {
+        --primary-color: #ff6b9e;
+        --primary-hover: #e55a8a;
+        --text-color: #333;
+        --light-gray: #f8f9fa;
+        --border-radius: 8px;
+        --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        line-height: 1.6;
+        color: var(--text-color);
+        background-color: #fff;
+    }
+
+    .landing-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+    }
+
+    /* Header */
+    .landing-header {
+        padding: 2rem 0;
+        text-align: center;
+        background: linear-gradient(135deg, #ff6b9e 0%, #ff99c8 100%);
+        color: white;
+        border-radius: 0 0 20px 20px;
+        margin-bottom: 3rem;
+    }
+
+    .logo-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .campus-logo {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logo-container h1 {
+        font-size: 2.5rem;
+        margin: 0;
+    }
+
+    .tagline {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+
+    /* Main Content */
+    .landing-content {
+        max-width: 1000px;
+        margin: 0 auto 3rem;
+    }
+
+    section {
+        margin-bottom: 3rem;
+    }
+
+    h2 {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .lead {
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.7;
+    }
+
+    /* Features Grid */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .feature-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        box-shadow: var(--box-shadow);
+        transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .feature-card h3 {
+        margin-bottom: 1rem;
+        color: #333;
+    }
+
+    .benefit {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        color: #666;
+    }
+
+    .benefit i {
+        color: #4caf50;
+        margin-top: 0.2rem;
+    }
+
+    /* Mission */
+    .mission {
+        text-align: center;
+        padding: 3rem 1rem;
+        background-color: var(--light-gray);
+        border-radius: var(--border-radius);
+    }
+
+    .mission-statement {
+        max-width: 700px;
+        margin: 0 auto;
+        font-size: 1.1rem;
+        line-height: 1.8;
+    }
+
+    /* CTA */
+    .cta {
+        text-align: center;
+        padding: 3rem 1rem;
+    }
+
+    .cta h2 {
+        justify-content: center;
+    }
+
+    .cta-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(255, 107, 158, 0.3);
+    }
+
+    .btn-outline {
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    .btn-outline:hover {
+        background-color: rgba(255, 107, 158, 0.1);
+        transform: translateY(-2px);
+    }
+
+    /* Footer */
+    .landing-footer {
+        text-align: center;
+        padding: 2rem 0;
+        color: #666;
+        border-top: 1px solid #eee;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .cta-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn {
+            width: 100%;
+            max-width: 250px;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">My Profile</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Profile Picture</h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        {% if preferences.profile_picture %}
+                            <img class="img-profile rounded-circle" 
+                                 src="{{ preferences.profile_picture.url }}" 
+                                 alt="Profile Picture"
+                                 style="width: 200px; height: 200px; object-fit: cover;">
+                        {% else %}
+                            <img class="img-profile rounded-circle" 
+                                 src="{% static 'img/undraw_profile.svg' %}" 
+                                 alt="Default Profile"
+                                 style="width: 200px; height: 200px; object-fit: cover;">
+                        {% endif %}
+                    </div>
+                    <form method="post" enctype="multipart/form-data" class="mb-3">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="profile_picture" name="profile_picture" accept="image/*">
+                                <label class="custom-file-label" for="profile_picture">Choose file</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Upload Picture</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Profile Information</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="user">
+                        {% csrf_token %}
+                        <div class="form-group row">
+                            <div class="col-sm-6 mb-3 mb-sm-0">
+                                <label>First Name</label>
+                                <input type="text" class="form-control form-control-user" 
+                                       value="{{ user.first_name }}" disabled>
+                            </div>
+                            <div class="col-sm-6">
+                                <label>Last Name</label>
+                                <input type="text" class="form-control form-control-user" 
+                                       value="{{ user.last_name }}" disabled>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" class="form-control form-control-user" 
+                                   value="{{ user.email }}" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" class="form-control form-control-user" 
+                                   name="phone" value="">
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <input type="text" class="form-control form-control-user" 
+                                   value="Administrator" disabled>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-user btn-block">
+                            Update Profile
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Update the file input label with the selected file name
+    $("#profile_picture").on("change", function() {
+        var fileName = $(this).val().split("\\").pop();
+        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    });
+</script>
+{% endblock %}

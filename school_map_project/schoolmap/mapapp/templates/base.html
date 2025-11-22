@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="{{ user.preferences.theme|default:'light' }}" 
+      data-font-size="{{ user.preferences.font_size|default:'medium' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FINDIT{% endblock %}</title>
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        :root {
+            --accent-color: {{ user.preferences.accent_color|default:'#ff6b9e' }};
+            --font-size: {% if user.preferences.font_size == 'small' %}14px
+                        {% elif user.preferences.font_size == 'large' %}18px
+                        {% else %}16px{% endif %};
+            
+            /* Light theme (default) */
+            --bg-color: #ffffff;
+            --text-color: #1a202c;
+            --card-bg: #f7fafc;
+            --border-color: #e2e8f0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dark theme */
+        [data-theme="dark"] {
+            --bg-color: #1a202c;
+            --text-color: #f7fafc;
+            --card-bg: #2d3748;
+            --border-color: #4a5568;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Sunset theme */
+        [data-theme="sunset"] {
+            --bg-color: #fff5f5;
+            --text-color: #2d3748;
+            --card-bg: linear-gradient(135deg, #fff5f5 0%, #fffaf0 100%);
+            --border-color: #feb2b2;
+            --shadow-color: rgba(254, 178, 178, 0.3);
+        }
+
+        /* Base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: var(--font-size);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Navigation */
+        nav {
+            background-color: var(--card-bg);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-color);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1.25rem;
+            border-radius: 4px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        /* Card styles */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        /* Layout */
+        .dashboard {
+            padding: 2rem 0;
+        }
+
+        [data-layout="grid"] .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        [data-layout="list"] .dashboard-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            [data-layout="grid"] .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* CSS changes from user */
+        .dropdown-menu { /* the element was div#dropdownMenu */
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body data-layout="{{ user.preferences.dashboard_layout|default:'grid' }}">
+    {% if not request.resolver_match.url_name == 'login' %}
+    <nav>
+        <a href="{% url 'home' %}" class="nav-logo">FINDIT</a>
+        <div class="nav-links">
+            {% if user.is_authenticated %}
+                {% if user.is_staff %}
+                    <a href="{% url 'admin_dashboard:dashboard' %}" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                    </a>
+                {% endif %}
+                {% if not request.resolver_match.url_name == 'about' and not request.resolver_match.url_name == 'help_support' %}
+                    <a href="{% url 'logout' %}" class="nav-link">Logout</a>
+                {% endif %}
+            {% else %}
+                <a href="{% url 'login' %}" class="nav-link">Login</a>
+                <a href="{% url 'register' %}" class="btn btn-primary">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; margin-top: 2rem; border-top: 1px solid var(--border-color);">
+        <p>&copy; 2025 FINDIT. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Apply theme settings
+        document.documentElement.style.setProperty('--accent-color', '{{ user.preferences.accent_color|default:"#ff6b9e" }}');
+        
+        // Set font size
+        const fontSize = '{{ user.preferences.font_size|default:"medium" }}';
+        if (fontSize === 'small') {
+            document.documentElement.style.setProperty('--font-size', '14px');
+        } else if (fontSize === 'large') {
+            document.documentElement.style.setProperty('--font-size', '18px');
+        } else {
+            document.documentElement.style.setProperty('--font-size', '16px');
+        }
+        
+        // Set layout
+        document.body.setAttribute('data-layout', '{{ user.preferences.dashboard_layout|default:"grid" }}');
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map Coordinate Helper</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            position: relative;
+            display: inline-block;
+        }
+        #mapImage {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+        }
+        .coords-display {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            z-index: 1000;
+        }
+        .marker {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: red;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        .coords-list {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Map Coordinate Helper</h1>
+    <p>Click anywhere on the map to see coordinates. Right-click to add a marker.</p>
+    
+    <div class="container">
+        <img id="mapImage" src="{% static 'img/FISHERIES MAP.svg' %}" alt="Campus Map">
+        <div id="markers"></div>
+    </div>
+    
+    <div class="coords-display">
+        <div>X: <span id="xCoord">0</span></div>
+        <div>Y: <span id="yCoord">0</span></div>
+    </div>
+    
+    <div class="coords-list">
+        <h3>Building Coordinates</h3>
+        <pre id="buildingCoords">// Copy these coordinates to buildings.js
+{
+    name: 'Building Name',
+    category: 'Category',
+    icon: 'icon-name',
+    description: 'Description',
+    coordinates: [longitude, latitude],
+    ...svgToPercent(x, y, width, height)
+}</pre>
+    </div>
+
+    <script>
+        const mapImage = document.getElementById('mapImage');
+        const xCoord = document.getElementById('xCoord');
+        const yCoord = document.getElementById('yCoord');
+        const markers = document.getElementById('markers');
+        const buildingCoords = document.getElementById('buildingCoords');
+        
+        let currentMarker = null;
+        
+        mapImage.addEventListener('mousemove', (e) => {
+            const rect = mapImage.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            xCoord.textContent = Math.round(x);
+            yCoord.textContent = Math.round(y);
+            
+            if (currentMarker) {
+                currentMarker.style.left = x + 'px';
+                currentMarker.style.top = y + 'px';
+            }
+        });
+        
+        mapImage.addEventListener('click', (e) => {
+            const rect = mapImage.getBoundingClientRect();
+            const x = Math.round(e.clientX - rect.left);
+            const y = Math.round(e.clientY - rect.top);
+            
+            const marker = document.createElement('div');
+            marker.className = 'marker';
+            marker.style.left = x + 'px';
+            marker.style.top = y + 'px';
+            markers.appendChild(marker);
+            
+            // Update the coordinates display
+            buildingCoords.textContent = `{
+    name: 'Building Name',
+    category: 'Category',
+    icon: 'icon-name',
+    description: 'Description',
+    coordinates: [longitude, latitude],
+    ...svgToPercent(${x}, ${y}, width, height)
+}`;
+        });
+        
+        // Right-click to remove markers
+        mapImage.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            while (markers.firstChild) {
+                markers.removeChild(markers.firstChild);
+            }
+        });
+    </script>
+</body>
+</html>

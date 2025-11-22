@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #fff5f7 0%, #eef2ff 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: #1f2937;
+        }
+
+        .details-container {
+            max-width: 960px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
+            overflow: hidden;
+        }
+
+        .details-header {
+            padding: 2.5rem;
+            background: linear-gradient(135deg, #ff6b9e 0%, #a78bfa 100%);
+            color: white;
+        }
+
+        .details-header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+
+        .details-header p {
+            margin-top: 0.75rem;
+            font-size: 1.05rem;
+            opacity: 0.9;
+        }
+
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .details-content {
+            padding: 2.5rem;
+        }
+
+        .info-card {
+            background: #f9fafb;
+            border-radius: 18px;
+            padding: 1.75rem;
+            margin-bottom: 1.75rem;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .info-card h2 {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .chip {
+            padding: 0.4rem 0.9rem;
+            border-radius: 999px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #2563eb;
+        }
+
+        .details-description {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #475569;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 1.75rem;
+        }
+
+        .meta-item {
+            padding: 1.25rem;
+            border-radius: 16px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .meta-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #fee2e2 0%, #e0f2fe 100%);
+            color: #1d4ed8;
+            font-size: 1.2rem;
+        }
+
+        .meta-text strong {
+            display: block;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .meta-text span {
+            font-size: 1.05rem;
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #94a3b8;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1.25rem;
+            }
+
+            .details-header, .details-content {
+                padding: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="details-container" id="detailsPage">
+        <div class="details-header">
+            <a href="/" class="back-link" style="color: rgba(255,255,255,0.8);">
+                <i class="fas fa-arrow-left"></i> Back to map
+            </a>
+            <h1 id="buildingName">Loading…</h1>
+            <p id="buildingDescription">Please wait while we load the building details.</p>
+            <div class="badge-row" id="badgeRow"></div>
+        </div>
+
+        <div class="details-content">
+            <div id="detailsBody"></div>
+            <div class="meta-grid" id="metaGrid"></div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/buildings.js' %}"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const buildingName = urlParams.get('building');
+        const buildingData = (window.buildingsData || []).find(b => b.name === buildingName);
+
+        const nameEl = document.getElementById('buildingName');
+        const descEl = document.getElementById('buildingDescription');
+        const badgeRow = document.getElementById('badgeRow');
+        const detailsBody = document.getElementById('detailsBody');
+        const metaGrid = document.getElementById('metaGrid');
+
+        function renderChips(items = []) {
+            if (!items.length) return '<span style="color:#94a3b8;">No data provided</span>';
+            return `<div class="chip-row">${items.map(item => `<span class="chip">${item}</span>`).join('')}</div>`;
+        }
+
+        function renderDetails(building) {
+            nameEl.textContent = building.name;
+            descEl.textContent = building.description;
+
+            badgeRow.innerHTML = `
+                <span class="badge"><i class="fas fa-layer-group"></i> ${building.category || 'Building'}</span>
+                ${building.icon ? `<span class="badge"><i class="fas fa-${building.icon}"></i> Icon</span>` : ''}
+            `;
+
+            const details = building.details || {};
+            const gradeLevels = details.gradeLevels || [];
+            const sections = details.sections || [];
+
+            detailsBody.innerHTML = `
+                <div class="info-card">
+                    <h2>Grade Levels Served</h2>
+                    ${renderChips(gradeLevels)}
+                </div>
+                <div class="info-card">
+                    <h2>Sections / Units</h2>
+                    ${renderChips(sections)}
+                </div>
+                <div class="info-card details-description">
+                    <h2>About this building</h2>
+                    <p>${details.extraInfo || building.description || 'Details coming soon.'}</p>
+                </div>
+            `;
+
+            const metaItems = [];
+            if (Array.isArray(building.coordinates)) {
+                const [lng, lat] = building.coordinates;
+                metaItems.push({ label: 'Latitude', value: lat?.toFixed ? lat.toFixed(4) : lat, icon: 'fa-location-arrow' });
+                metaItems.push({ label: 'Longitude', value: lng?.toFixed ? lng.toFixed(4) : lng, icon: 'fa-compass' });
+            }
+            if (building.hasRestroom !== undefined) {
+                metaItems.push({ label: 'Restrooms', value: building.hasRestroom ? 'Available' : 'None', icon: 'fa-restroom' });
+            }
+            if (building.hasElevator !== undefined) {
+                metaItems.push({ label: 'Elevator', value: building.hasElevator ? 'Available' : 'Not available', icon: 'fa-elevator' });
+            }
+
+            metaGrid.innerHTML = metaItems.map(item => `
+                <div class="meta-item">
+                    <div class="meta-icon"><i class="fas ${item.icon}"></i></div>
+                    <div class="meta-text">
+                        <strong>${item.label}</strong>
+                        <span>${item.value || '—'}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        if (buildingData) {
+            renderDetails(buildingData);
+        } else {
+            const container = document.getElementById('detailsBody');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-building"></i>
+                    <h3>Building not found</h3>
+                    <p>We couldn\'t find information for "${buildingName || 'Unknown'}".</p>
+                    <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Back to map</a>
+                </div>
+            `;
+            nameEl.textContent = 'Building Details';
+            descEl.textContent = 'Please return to the map and try again.';
+        }
+    </script>
+</body>
+</html>

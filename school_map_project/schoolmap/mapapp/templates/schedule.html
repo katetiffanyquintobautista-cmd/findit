@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if is_teacher %}Teaching{% else %}Class{% endif %} Schedule - FINDIT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Form Styles */
+        .schedule-form {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #4b5563;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+        
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        
+        :root {
+            --primary-color: #ff6b9e;
+            --secondary-color: #a78bfa;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+            --gray-color: #94a3b8;
+            --border-color: #e2e8f0;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .back-button i {
+            margin-right: 0.5rem;
+        }
+
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .schedule-header h1 {
+            font-size: 1.75rem;
+            color: var(--dark-color);
+        }
+
+        .academic-year {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .tabs {
+            display: flex;
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--gray-color);
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab:hover:not(.active) {
+            color: var(--dark-color);
+        }
+
+        .schedule-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .schedule-day {
+            display: none;
+            padding: 1.5rem;
+        }
+
+        .schedule-day.active {
+            display: block;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .schedule-table th {
+            text-align: left;
+            padding: 1rem;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+
+        .schedule-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+
+        .schedule-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .time-slot {
+            font-weight: 500;
+            color: var(--gray-color);
+            white-space: nowrap;
+        }
+
+        .class-card {
+            background: white;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            margin-bottom: 1rem;
+        }
+
+        .class-card h3 {
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .class-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: var(--gray-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .class-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .class-meta i {
+            color: var(--primary-color);
+        }
+
+        .map-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+
+        .map-link i {
+            margin-right: 0.25rem;
+        }
+
+        .no-classes {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--gray-color);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .schedule-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .tabs {
+                padding-bottom: 0;
+            }
+
+            .tab {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #0f172a;
+                color: #e2e8f0;
+            }
+
+            .schedule-container, .class-card {
+                background-color: #1e293b;
+                color: #e2e8f0;
+            }
+
+            .schedule-table th {
+                background-color: #334155;
+                color: #e2e8f0;
+            }
+
+            .schedule-table td {
+                border-bottom-color: #334155;
+            }
+
+            .class-card h3 {
+                color: #e2e8f0;
+            }
+
+            .class-meta {
+                color: #94a3b8;
+            }
+        }
+
+        .btn-secondary {
+            background-color: #64748b;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background-color: #475569;
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            padding: 0.4rem 0.9rem;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .schedule-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .schedule-actions form {
+            margin: 0;
+        }
+
+        .inline-form {
+            display: inline-block;
+        }
+
+        .section-management {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .teacher-section-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .teacher-section-card {
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            background: var(--light-color);
+        }
+
+        .teacher-section-card h4 {
+            margin-bottom: 0.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .badge-active {
+            background-color: var(--success-color);
+        }
+
+        .badge-inactive {
+            background-color: var(--danger-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% if is_teacher %}{% url 'profile' %}{% else %}{% url 'home' %}{% endif %}" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Back to {% if is_teacher %}Profile{% else %}Home{% endif %}
+        </a>
+
+        <div class="schedule-header">
+            <h1>{% if is_teacher %}My Teaching Schedule{% else %}My Class Schedule{% endif %}</h1>
+            <span class="academic-year">{{ current_year }} Academic Year</span>
+        </div>
+
+        {% if not is_teacher and not section %}
+        <div class="schedule-form" style="margin-bottom: 2rem;">
+            <h3>Enroll in a Section</h3>
+            <p style="color: var(--gray-color); margin-bottom: 1rem;">To view your class schedule, please select a section to enroll in for the current academic year.</p>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="student_section">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ enrollment_form.section.id_for_label }}">Section</label>
+                        {{ enrollment_form.section }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ enrollment_form.academic_year.id_for_label }}">Academic Year</label>
+                        {{ enrollment_form.academic_year }}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Enroll in Section
+                </button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if not is_teacher and section %}
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f0f9ff; border-radius: 0.5rem; border-left: 4px solid #0ea5e9;">
+            <strong>Section:</strong> {{ section.name }} (Grade {{ section.grade_level }})<br>
+            {% if section.adviser %}
+                <strong>Adviser:</strong> {{ section.adviser.get_full_name|default:section.adviser.username }}
+            {% endif %}
+        </div>
+        
+        <!-- Notifications Section -->
+        <div class="notifications-section" style="margin-bottom: 2rem;">
+            <h3 style="margin-bottom: 1rem; color: var(--dark-color);">Recent Updates</h3>
+            <div id="notifications-container">
+                <div style="text-align: center; padding: 2rem; color: var(--gray-color);">
+                    <i class="fas fa-bell" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <p>No recent notifications</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if is_teacher %}
+        <div class="section-management">
+            <h3>Manage Sections</h3>
+            <form method="post" class="schedule-form" style="margin-bottom: 1.5rem;" id="sectionForm">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="section">
+                <input type="hidden" name="section_id" id="sectionIdField" value="{{ editing_section_id }}">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="id_name">Section Name</label>
+                        {{ section_form.name }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_grade_level">Grade Level</label>
+                        {{ section_form.grade_level }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_academic_year_section">Academic Year</label>
+                        {{ section_form.academic_year }}
+                    </div>
+                    <div class="form-group" style="display:flex; align-items:center; gap:0.5rem;">
+                        {{ section_form.is_active }}
+                        <label for="id_is_active" style="margin-bottom:0;">Active</label>
+                    </div>
+                </div>
+                <div style="display:flex; gap:0.75rem;">
+                    <button type="submit" class="btn btn-primary" id="sectionSubmitBtn">
+                        <i class="fas fa-plus"></i> Add Section
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancelSectionEditBtn" style="display:none;">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
+
+            <div>
+                <h4>Your Sections</h4>
+                {% if teacher_sections %}
+                <div class="teacher-section-list">
+                    {% for section in teacher_sections %}
+                    <div class="teacher-section-card">
+                        <h4>{{ section.name }}</h4>
+                        <p style="margin-bottom: 0.5rem;">Grade {{ section.grade_level }} · {{ section.academic_year }}</p>
+                        <span class="badge {% if section.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                            {% if section.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                        <div class="schedule-actions" style="justify-content:flex-start; margin-top:0.75rem;">
+                            <button type="button" class="btn-secondary edit-section-btn"
+                                data-section-id="{{ section.id }}"
+                                data-name="{{ section.name }}"
+                                data-grade-level="{{ section.grade_level }}"
+                                data-academic-year="{{ section.academic_year }}"
+                                data-is-active="{{ section.is_active|yesno:'true,false' }}">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <form method="post" class="inline-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="section">
+                                <input type="hidden" name="delete_section_id" value="{{ section.id }}">
+                                <button type="submit" class="btn-danger">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p style="color: var(--gray-color);">No sections yet. Use the form above to add one.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Add Schedule Form -->
+        {% if is_teacher %}
+        <div class="schedule-form-container" style="margin-bottom: 2rem;">
+            <h3 id="formTitle">Add New Schedule</h3>
+            <form method="post" id="scheduleForm" class="schedule-form">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="schedule">
+                <input type="hidden" name="schedule_id" id="scheduleIdField" value="{{ editing_schedule_id }}">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="id_subject">Subject</label>
+                        {{ form.subject }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_section">Section</label>
+                        {{ form.section }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_room">Room</label>
+                        {{ form.room }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_day">Day</label>
+                        {{ form.day }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_time_slot">Time Slot</label>
+                        {{ form.time_slot }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_academic_year">Academic Year</label>
+                        {{ form.academic_year }}
+                    </div>
+                </div>
+                <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                    <button type="submit" class="btn btn-primary" id="scheduleSubmitBtn">
+                        <i class="fas fa-plus"></i> Add Schedule
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancelEditBtn" style="display: none;">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        <div class="tabs" id="dayTabs">
+            {% for day, schedules in schedule_days %}
+            <div class="tab {% if forloop.first %}active{% endif %}" data-day="{{ day }}">
+                {{ day|title }}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="schedule-container">
+            {% for day, schedules in schedule_days %}
+            <div class="schedule-day {% if forloop.first %}active{% endif %}" id="{{ day }}">
+                {% if schedules %}
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Class</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for schedule in schedules %}
+                        <tr>
+                            <td class="time-slot">{{ schedule.get_time_slot_display }}</td>
+                            <td>
+                                <div class="class-card">
+                                    <h3>{{ schedule.subject.name }}</h3>
+                                    <div class="class-meta">
+                                        {% if is_teacher %}
+                                        <span><i class="fas fa-users"></i> {{ schedule.section.name }}</span>
+                                        {% else %}
+                                        <span><i class="fas fa-chalkboard-teacher"></i> {{ schedule.teacher.get_full_name|default:schedule.teacher.username }}</span>
+                                        {% endif %}
+                                        {% if schedule.room %}
+                                        <span><i class="fas fa-door-open"></i> {{ schedule.room }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if schedule.room %}
+                                    <a href="#" class="map-link" data-room-id="{{ schedule.room.id }}">
+                                        <i class="fas fa-map-marker-alt"></i> View on Map
+                                    </a>
+                                    {% endif %}
+                                    {% if is_teacher %}
+                                    <div class="schedule-actions">
+                                        <button type="button" class="btn-secondary edit-schedule-btn"
+                                            data-schedule-id="{{ schedule.id }}"
+                                            data-subject-id="{{ schedule.subject.id }}"
+                                            data-section-id="{{ schedule.section.id }}"
+                                            data-room-id="{{ schedule.room.id|default:'' }}"
+                                            data-day="{{ schedule.day }}"
+                                            data-time-slot="{{ schedule.time_slot }}"
+                                            data-academic-year="{{ schedule.academic_year }}">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <form method="post" class="inline-form">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="delete_schedule_id" value="{{ schedule.id }}">
+                                            <button type="submit" class="btn-danger">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="no-classes">
+                    <i class="fas fa-calendar-day" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <p>No classes scheduled for {{ day|title }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Hidden div for Django template variables -->
+    <div style="display: none;" 
+         data-user-id="{{ user.id|default_if_none:'' }}" 
+         data-section-id="{{ section.id|default_if_none:'' }}" 
+         data-last-schedule-update="{{ schedules_last_updated|default_if_none:'' }}"
+         data-is-teacher="{% if is_teacher %}true{% else %}false{% endif %}">
+    </div>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and days
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.schedule-day').forEach(day => day.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding day
+                tab.classList.add('active');
+                const day = tab.getAttribute('data-day');
+                document.getElementById(day).classList.add('active');
+            });
+        });
+
+        // Handle map link clicks
+        document.querySelectorAll('.map-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const roomId = link.getAttribute('data-room-id');
+                // Here you would typically open the map with the room location
+                alert('Map integration would show the location of this room.');
+                // Example: window.location.href = `/map?room=${roomId}`;
+            });
+        });
+
+        // Auto-scroll tabs if needed
+        const tabsContainer = document.getElementById('dayTabs');
+        const activeTab = document.querySelector('.tab.active');
+        if (activeTab) {
+            activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+
+        // Edit section functionality
+        document.querySelectorAll('.edit-section-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                document.getElementById('sectionIdField').value = button.dataset.sectionId;
+                document.getElementById('id_name').value = button.dataset.name;
+                document.getElementById('id_grade_level').value = button.dataset.gradeLevel;
+                document.getElementById('id_academic_year_section').value = button.dataset.academicYear;
+                document.getElementById('id_is_active').checked = button.dataset.isActive === 'true';
+                document.getElementById('sectionSubmitBtn').innerHTML = '<i class="fas fa-save"></i> Update Section';
+                document.getElementById('cancelSectionEditBtn').style.display = 'inline-flex';
+            });
+        });
+
+        if (document.getElementById('sectionIdField') && document.getElementById('sectionIdField').value) {
+            document.getElementById('sectionSubmitBtn').innerHTML = '<i class="fas fa-save"></i> Update Section';
+            document.getElementById('cancelSectionEditBtn').style.display = 'inline-flex';
+        }
+
+        // Reset section form
+        function resetSectionForm() {
+            document.getElementById('sectionForm').reset();
+            document.getElementById('sectionIdField').value = '';
+            document.getElementById('sectionSubmitBtn').innerHTML = '<i class="fas fa-plus"></i> Add Section';
+            document.getElementById('cancelSectionEditBtn').style.display = 'none';
+        }
+
+        if (document.getElementById('cancelSectionEditBtn')) {
+            document.getElementById('cancelSectionEditBtn').addEventListener('click', resetSectionForm);
+        }
+
+        // Edit schedule functionality
+        document.querySelectorAll('.edit-schedule-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                document.getElementById('scheduleIdField').value = button.dataset.scheduleId;
+                document.getElementById('id_subject').value = button.dataset.subjectId;
+                document.getElementById('id_section').value = button.dataset.sectionId;
+                document.getElementById('id_room').value = button.dataset.roomId || '';
+                document.getElementById('id_day').value = button.dataset.day;
+                document.getElementById('id_time_slot').value = button.dataset.timeSlot;
+                document.getElementById('id_academic_year').value = button.dataset.academicYear;
+                document.getElementById('scheduleSubmitBtn').innerHTML = '<i class="fas fa-save"></i> Update Schedule';
+                document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+                document.getElementById('formTitle').textContent = 'Edit Schedule';
+            });
+        });
+
+        if (document.getElementById('scheduleIdField') && document.getElementById('scheduleIdField').value) {
+            document.getElementById('scheduleSubmitBtn').innerHTML = '<i class="fas fa-save"></i> Update Schedule';
+            document.getElementById('cancelEditBtn').style.display = 'inline-flex';
+            document.getElementById('formTitle').textContent = 'Edit Schedule';
+        }
+
+        // Reset schedule form
+        function resetScheduleForm() {
+            document.getElementById('scheduleForm').reset();
+            document.getElementById('scheduleIdField').value = '';
+            document.getElementById('scheduleSubmitBtn').innerHTML = '<i class="fas fa-plus"></i> Add Schedule';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            document.getElementById('formTitle').textContent = 'Add New Schedule';
+        }
+
+        // Set Django template variables as JavaScript globals
+        const currentUserId = document.querySelector('[data-user-id]')?.getAttribute('data-user-id');
+        const currentSectionId = document.querySelector('[data-section-id]')?.getAttribute('data-section-id');
+        const lastScheduleUpdate = document.querySelector('[data-last-schedule-update]')?.getAttribute('data-last-schedule-update') || '';
+
+        if (document.getElementById('cancelEditBtn')) {
+            document.getElementById('cancelEditBtn').addEventListener('click', resetScheduleForm);
+        }
+
+        // Load notifications for students
+        if (document.querySelector('[data-is-teacher]')?.getAttribute('data-is-teacher') === 'false') {
+        async function loadNotifications() {
+            try {
+                const userId = currentUserId;
+                if (!userId) return;
+                const notifResponse = await fetch(`/api/user/${userId}/notifications/`);
+                const notifData = await notifResponse.json();
+                
+                const container = document.getElementById('notifications-container');
+                if (notifData.notifications && notifData.notifications.length > 0) {
+                    container.innerHTML = notifData.notifications.map(notification => `
+                        <div class="notification-item" style="padding: 1rem; border: 1px solid var(--border-color); border-radius: 0.5rem; margin-bottom: 0.5rem; background: white;">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1rem; color: var(--dark-color);">${notification.title}</h4>
+                                    <p style="margin: 0.5rem 0; color: var(--gray-color); font-size: 0.9rem;">${notification.body || ''}</p>
+                                    <small style="color: var(--gray-color);">${new Date(notification.created_at).toLocaleDateString()}</small>
+                                </div>
+                                ${!notification.is_read ? '<span style="background: var(--primary-color); color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">NEW</span>' : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Failed to load notifications:', error);
+            }
+        }
+
+        // Load notifications on page load
+        loadNotifications();
+        }
+
+        // Schedule auto-refresh for students
+        if (document.querySelector('[data-is-teacher]')?.getAttribute('data-is-teacher') === 'false' && currentSectionId) {
+        let isRefreshing = false;
+
+        async function checkScheduleUpdates() {
+            if (isRefreshing) return;
+
+            try {
+                const sectionId = currentSectionId;
+                if (!sectionId) return;
+                const updateResponse = await fetch(`/api/sections/${sectionId}/schedule-updates/`);
+                const updateData = await updateResponse.json();
+
+                if (updateData.schedules_last_updated !== lastScheduleUpdate) {
+                    console.log('Schedule updated, refreshing...');
+                    lastScheduleUpdate = updateData.schedules_last_updated;
+                    
+                    // Show update indicator
+                    showUpdateIndicator();
+                    
+                    // Refresh the schedule
+                    await refreshSchedule();
+                }
+            } catch (error) {
+                console.error('Failed to check schedule updates:', error);
+            }
+        }
+
+        function showUpdateIndicator() {
+            // Remove existing indicator
+            const existing = document.querySelector('.schedule-update-indicator');
+            if (existing) existing.remove();
+
+            // Create new indicator
+            const indicator = document.createElement('div');
+            indicator.className = 'schedule-update-indicator';
+            indicator.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--success-color);
+                color: white;
+                padding: 0.75rem 1rem;
+                border-radius: 0.5rem;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                z-index: 1000;
+                font-size: 0.9rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            `;
+            indicator.innerHTML = '<i class="fas fa-sync-alt"></i> Schedule updated!';
+
+            document.body.appendChild(indicator);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                if (indicator.parentNode) {
+                    indicator.remove();
+                }
+            }, 3000);
+        }
+
+        async function refreshSchedule() {
+            isRefreshing = true;
+            
+            try {
+                // Fetch updated schedule data
+                const refreshResponse = await fetch(window.location.href);
+                const refreshHtml = await refreshResponse.text();
+                
+                // Parse the HTML and extract the schedule container
+                const parser = new DOMParser();
+                const newDoc = parser.parseFromString(refreshHtml, 'text/html');
+                const newScheduleContainer = newDoc.querySelector('.schedule-container');
+                
+                if (newScheduleContainer) {
+                    // Replace the current schedule container
+                    const currentContainer = document.querySelector('.schedule-container');
+                    currentContainer.innerHTML = newScheduleContainer.innerHTML;
+                    
+                    // Update tabs functionality
+                    document.querySelectorAll('.tab').forEach(tab => {
+                        tab.addEventListener('click', () => {
+                            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                            document.querySelectorAll('.schedule-day').forEach(day => day.classList.remove('active'));
+                            
+                            tab.classList.add('active');
+                            const day = tab.getAttribute('data-day');
+                            document.getElementById(day).classList.add('active');
+                        });
+                    });
+                    
+                    // Auto-scroll to active tab
+                    const activeTab = document.querySelector('.tab.active');
+                    if (activeTab) {
+                        activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    }
+                    
+                    console.log('Schedule refreshed successfully');
+                }
+            } catch (error) {
+                console.error('Failed to refresh schedule:', error);
+            } finally {
+                isRefreshing = false;
+            }
+        }
+
+        // Check for updates every 10 seconds
+        setInterval(checkScheduleUpdates, 10000);
+        }
+    </script>
+</body>
+</html>

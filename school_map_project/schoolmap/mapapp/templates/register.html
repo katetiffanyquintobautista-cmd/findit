@@ -1,0 +1,527 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FINDIT - Register</title>
+    <style>
+        .error {
+            color: #d32f2f;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
+            border: 2px solid #ffcce0; /* Lighter pink border */
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+            background-color: #fff9fb; /* Very light pink background */
+        }
+        
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            border-color: #ff6b9e;
+            box-shadow: 0 0 0 3px rgba(255, 107, 158, 0.2);
+        }
+        
+        .errorlist {
+            list-style: none;
+            padding: 0;
+            margin: 0.25rem 0 0 0;
+            color: #d32f2f;
+            font-size: 0.85rem;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #fff0f5; /* Light pink background */
+        }
+        
+        .left-section {
+            flex: 1;
+            background: #fff0f5; /* Light pink background */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .logo-container {
+            margin-bottom: 2rem;
+        }
+        
+        .logo {
+            width: 160px;  /* Increased from 120px */
+            height: 160px;  /* Increased from 120px */
+            background: #ff6b9e; /* Pink accent color */
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            padding: 10px;  /* Added padding for better spacing */
+        }
+        
+        .logo i {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #d6336c; /* Darker pink for text */
+            margin-bottom: 1rem;
+        }
+        
+        .description {
+            color: #d6336c; /* Darker pink for text */
+            max-width: 400px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        
+        .right-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            background-color: white;
+            overflow-y: auto;
+        }
+        
+        .register-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            background: white;
+        }
+        
+        .register-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .register-header h1 {
+            color: #d6336c; /* Darker pink for text */
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .user-type-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+        
+        .tab-btn {
+            padding: 0.5rem 1.5rem;
+            border: 2px solid #ff6b9e;
+            background: none;
+            border-radius: 20px;
+            color: #ff6b9e;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn.active {
+            background: #ff6b9e;
+            color: white;
+        }
+        
+        .tab-btn:not(.active):hover {
+            background: rgba(255, 107, 158, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
+            border: 2px solid #e0d0f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+            background-color: #faf5ff;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            border-color: #9c27b0;
+            box-shadow: 0 0 0 3px rgba(156, 39, 176, 0.2);
+        }
+        
+        .password-note {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.25rem;
+            font-style: italic;
+        }
+        
+        .register-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #ff6b9e, #ff8fab);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 158, 0.3);
+            background: linear-gradient(135deg, #ff8fab, #ff6b9e);
+        }
+        
+        .login-link {
+            text-align: center;
+            color: #666;
+        }
+        
+        .login-link a {
+            color: #9c27b0;
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .login-link a:hover {
+            color: #7b1fa2;
+            text-decoration: underline;
+        }
+        
+        .user-type-label {
+            display: inline-block;
+            background: #f0e5ff;
+            color: #7b1fa2;
+            padding: 0.25rem 1rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .left-section, .right-section {
+                padding: 2rem 1.5rem;
+            }
+            
+            .register-container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="left-section">
+        <div class="logo-container">
+            <div class="logo">
+                <img src="{% static 'img/logo.png' %}" alt="FINDIT Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 50%;">
+            </div>
+            <div class="logo-text">FINDIT</div>
+        </div>
+        <p class="description">
+            Welcome to FINDIT, your interactive high school campus map system. 
+            Easily locate classrooms, facilities, and key areas within the school 
+            with our intuitive navigation tool.
+        </p>
+    </div>
+    
+    <div class="right-section">
+        <div class="register-container">
+            <div class="register-header">
+                <h1>REGISTER</h1>
+                <p>Create your account to get started</p>
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" style="color: #d32f2f; margin-bottom: 1rem; padding: 0.75rem; background: #ffebee; border-radius: 8px; text-align: center;">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+            
+            <div class="user-type-tabs">
+                <button type="button" class="tab-btn {% if active_tab == 'student' %}active{% endif %}" onclick="switchTab('student')">Student</button>
+                <button type="button" class="tab-btn {% if active_tab == 'teacher' %}active{% endif %}" onclick="switchTab('teacher')">Teacher</button>
+            </div>
+            
+            <!-- Student Registration Form -->
+            <div id="student-form" class="tab-content {% if active_tab == 'student' %}active{% endif %}">
+                <div class="user-type-label">Student Registration</div>
+                <form id="studentRegisterForm" action="{% url 'register' %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="student_submit" value="1">
+                    <div class="form-group">
+                        <label for="id_username">Username</label>
+                        {{ student_form.username }}
+                        {% if student_form.username.errors %}
+                            <div class="error">{{ student_form.username.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_full_name">Full Name</label>
+                        {{ student_form.full_name }}
+                        {% if student_form.full_name.errors %}
+                            <div class="error">{{ student_form.full_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_lrn">LRN (Learner Reference Number)</label>
+                        {{ student_form.lrn }}
+                        {% if student_form.lrn.errors %}
+                            <div class="error">{{ student_form.lrn.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_grade_section">Grade Level - Section</label>
+                        {{ student_form.grade_section }}
+                        {% if student_form.grade_section.errors %}
+                            <div class="error">{{ student_form.grade_section.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_email">Email Address</label>
+                        {{ student_form.email }}
+                        {% if student_form.email.errors %}
+                            <div class="error">{{ student_form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_password1">Password</label>
+                        {{ student_form.password1 }}
+                        <p class="password-note">Password must be at least 8 characters long</p>
+                        {% if student_form.password1.errors %}
+                            <div class="error">{{ student_form.password1.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_password2">Confirm Password</label>
+                        {{ student_form.password2 }}
+                        {% if student_form.password2.errors %}
+                            <div class="error">{{ student_form.password2.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <button type="submit" class="register-btn">Create Account</button>
+                </form>
+            </div>
+            
+            <!-- Teacher Registration Form -->
+            <div id="teacher-form" class="tab-content {% if active_tab == 'teacher' %}active{% endif %}">
+                <div class="user-type-label">Teacher Registration</div>
+                <form id="teacherRegisterForm" action="{% url 'register' %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="teacher_submit" value="1">
+                    <div class="form-group">
+                        <label for="id_username">Username</label>
+                        {{ teacher_form.username }}
+                        {% if teacher_form.username.errors %}
+                            <div class="error">{{ teacher_form.username.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_full_name">Full Name</label>
+                        {{ teacher_form.full_name }}
+                        {% if teacher_form.full_name.errors %}
+                            <div class="error">{{ teacher_form.full_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_faculty_id">Faculty ID Number</label>
+                        {{ teacher_form.faculty_id }}
+                        {% if teacher_form.faculty_id.errors %}
+                            <div class="error">{{ teacher_form.faculty_id.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_department">Department</label>
+                        {{ teacher_form.department }}
+                        {% if teacher_form.department.errors %}
+                            <div class="error">{{ teacher_form.department.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_email">Email Address</label>
+                        {{ teacher_form.email }}
+                        {% if teacher_form.email.errors %}
+                            <div class="error">{{ teacher_form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_password1">Password</label>
+                        {{ teacher_form.password1 }}
+                        <p class="password-note">Password must be at least 8 characters long</p>
+                        {% if teacher_form.password1.errors %}
+                            <div class="error">{{ teacher_form.password1.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_password2">Confirm Password</label>
+                        {{ teacher_form.password2 }}
+                        {% if teacher_form.password2.errors %}
+                            <div class="error">{{ teacher_form.password2.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <button type="submit" class="register-btn">Create Account</button>
+                </form>
+            </div>
+            
+            <div class="login-link">
+                Already have an account? <a href="{% url 'login' %}">Login here</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show the selected tab content
+            const tabContent = document.getElementById(tabName + '-form');
+            if (tabContent) {
+                tabContent.classList.add('active');
+            }
+            
+            // Set the clicked button as active
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            } else {
+                // If called programmatically, find and activate the correct button
+                const buttons = document.querySelectorAll('.tab-btn');
+                buttons.forEach(btn => {
+                    if (btn.textContent.trim().toLowerCase() === tabName) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+            
+            // Prevent form submission if it was triggered by a button click
+            if (event) {
+                event.preventDefault();
+            }
+            return false;
+        }
+        
+        // Set active tab on page load based on server-side value
+        document.addEventListener('DOMContentLoaded', function() {
+            const activeTab = '{{ active_tab }}';
+            if (activeTab) {
+                switchTab(activeTab);
+            }
+        });
+        
+        // Form validation for student registration
+        document.getElementById('studentRegisterForm')?.addEventListener('submit', function(e) {
+            const password = document.getElementById('studentPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+                return false;
+            }
+            
+            // Add additional validation if needed
+        });
+        
+        // Form validation for teacher registration
+        document.getElementById('teacherRegisterForm')?.addEventListener('submit', function(e) {
+            const password = document.getElementById('teacherPassword').value;
+            const confirmPassword = document.getElementById('teacherConfirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+                return false;
+            }
+            
+            // Add additional validation if needed
+        });
+    </script>
+</body>
+</html>

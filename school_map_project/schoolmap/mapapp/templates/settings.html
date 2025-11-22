@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="{{ current_theme|default:'light' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appearance Settings - FINDIT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Status Messages */
+        .status-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideDown 0.3s ease-out;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        
+        .status-message.success {
+            background-color: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .status-message.error {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .status-message i {
+            font-size: 1.2em;
+        }
+        
+        .close-message {
+            margin-left: auto;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: inherit;
+            font-size: 1.2em;
+            padding: 0 4px;
+            line-height: 1;
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        /* Theme Variables */
+        :root {
+            --primary-color: #ff6b9e;
+            --secondary-color: #a78bfa;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+            --gray-color: #94a3b8;
+            --border-color: #e2e8f0;
+            --success-color: #10b981;
+            --danger-color: #f44b9f8a;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --accent-color: #ff6b9e;
+            --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s ease;
+            
+            /* Theme-specific variables - these will be overridden by JavaScript */
+            --bg-color: #f8fafc;
+            --text-color: #1e293b;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+        }
+        :root {
+            --primary-color: #ff6b9e;
+            --secondary-color: #a78bfa;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+            --gray-color: #94a3b8;
+            --border-color: #e2e8f0;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --accent-color: #ff6b9e;
+            --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        :root {
+            --font-size: 16px; /* Default font size */
+        }
+        
+        html {
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+            font-size: var(--font-size);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Apply font size to all text elements */
+        body, p, h1, h2, h3, h4, h5, h6, input, button, select, textarea {
+            font-size: var(--font-size);
+        }
+
+        .page-container {
+            display: flex;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            transition: background-color 0.3s ease;
+        }
+
+        .settings-sidebar {
+            width: 280px;
+            background: var(--card-bg);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            transition: background-color 0.3s ease;
+        }
+
+        .settings-main {
+            flex: 1;
+            padding: 2.5rem 3rem;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            background: var(--card-bg);
+            min-height: 100vh;
+            position: relative;
+            transition: background-color 0.3s ease;
+        }
+        
+        .settings-form {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .settings-container {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+
+        .settings-header {
+            background: var(--primary-color);
+            color: white;
+            position: relative;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: -2.5rem -3rem 2rem -3rem;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .back-to-home {
+            display: inline-flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            margin-right: 1.5rem;
+            transition: opacity 0.2s ease;
+        }
+        
+        .back-to-home:hover {
+            opacity: 0.9;
+        }
+        
+        .back-to-home i {
+            margin-right: 0.5rem;
+        }
+        
+        .settings-header .header-content h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+        
+        .settings-header .header-content p {
+            margin: 0;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        
+        .settings-header .header-actions .btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .settings-header .header-actions .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .settings-header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .settings-header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+            transition: opacity 0.2s;
+        }
+
+        .back-button:hover {
+            opacity: 0.9;
+            color: white;
+            text-decoration: none;
+        }
+
+        .back-button i {
+            margin-right: 0.5rem;
+        }
+
+        .settings-form {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #334155;
+        }
+
+        .form-section {
+            margin-bottom: 2.5rem;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 1.75rem 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+        
+        .form-section:last-child {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-section:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .form-section h2 {
+            font-size: 1.25rem;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-section h2 i {
+            color: var(--primary-color);
+            width: 24px;
+            text-align: center;
+        }
+
+        .text-muted {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        .form-section h2 {
+            font-size: 1.25rem;
+            color: var(--dark-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-section h2 i {
+            color: var(--primary-color);
+        }
+
+        .theme-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .theme-option {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+            text-align: center;
+        }
+
+        .theme-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-option input[type="radio"] {
+            display: none;
+        }
+
+        .theme-option input[type="radio"]:checked + .theme-content {
+            border-color: var(--primary-color);
+            background-color: rgba(255, 107, 158, 0.1);
+        }
+
+        .theme-content {
+            padding: 1rem;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .theme-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .theme-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .theme-desc {
+            font-size: 0.85rem;
+            color: var(--gray-color);
+        }
+
+        /* Color Picker */
+        .color-picker-container {
+            margin-top: 1.5rem;
+        }
+
+        .color-picker-label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        /* Font Size Options */
+        .font-size-options {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .font-size-option {
+            flex: 1;
+            text-align: center;
+        }
+
+        .font-size-option input[type="radio"] {
+            display: none;
+        }
+
+        .font-size-option label {
+            display: block;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .font-size-option input[type="radio"]:checked + label {
+            border-color: var(--primary-color);
+            background-color: rgba(255, 107, 158, 0.1);
+            color: var(--primary-color);
+        }
+
+        /* Layout Options */
+        .layout-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .layout-option {
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: var(--transition);
+            background: white;
+        }
+        
+        .layout-option:hover, 
+        .layout-option.active {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(255, 107, 158, 0.2);
+        }
+        
+        .layout-option .layout-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 0.5rem;
+            min-height: 80px;
+        }
+        
+        .layout-option .layout-preview > div {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        
+        .layout-option .layout-preview.grid > div {
+            height: 20px;
+        }
+        
+        .layout-option .layout-preview.list > div {
+            height: 12px;
+            margin-bottom: 4px;
+        }
+        
+        .layout-option .layout-name {
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .layout-preview.grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 4px;
+            padding: 4px;
+            background: #f1f5f9;
+        }
+
+        .layout-preview.grid div {
+            background: var(--primary-color);
+            opacity: 0.3;
+            border-radius: 4px;
+        }
+
+        .layout-preview.list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 8px;
+            background: #f1f5f9;
+        }
+
+        .layout-preview.list div {
+            background: var(--primary-color);
+            opacity: 0.3;
+            border-radius: 4px;
+            height: 12px;
+            margin: 2px 0;
+        }
+
+        .layout-option input[type="radio"] {
+            display: none;
+        }
+
+        .layout-option input[type="radio"]:checked + .layout-preview {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 107, 158, 0.3);
+        }
+
+        .layout-name {
+            font-size: 0.9rem;
+            color: var(--dark-color);
+        }
+
+        /* Buttons */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2.5rem auto 0;
+            padding: 1.5rem 0;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+        }
+        
+        @media (max-width: 768px) {
+            .page-container {
+                flex-direction: column;
+            }
+            
+            .settings-sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                border-radius: 0;
+            }
+            
+            .settings-main {
+                padding: 1.5rem;
+                border-radius: 0;
+            }
+            
+            .settings-header {
+                margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+                padding: 1.5rem;
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-actions {
+                margin-top: 1rem;
+                width: 100%;
+            }
+            
+            .header-actions .btn {
+                width: 100%;
+            }
+        }
+        
+        .form-actions .btn {
+            min-width: 120px;
+            justify-content: center;
+        }
+        
+        .btn {
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--dark-color);
+        }
+
+        .btn-outline:hover {
+            background: #f8fafc;
+            border-color: var(--gray-color);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #f43f5e;
+            transform: translateY(-1px);
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 0.8rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--dark-color);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* Dropdown Menu */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropbtn {
+            background-color: transparent;
+            color: var(--dark-color);
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .dropbtn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--card-bg);
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            z-index: 1;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown-content a {
+            color: var(--dark-color);
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            display: block;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+            color: var(--primary-color);
+            border-left: 3px solid var(--primary-color);
+            padding-left: 0.875rem;
+        }
+
+        .dropdown-content a.active {
+            background-color: rgba(255, 107, 158, 0.1);
+            color: var(--primary-color);
+            border-left: 3px solid var(--primary-color);
+            padding-left: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .settings-container {
+                margin: 1rem;
+                border-radius: 8px;
+            }
+
+            .settings-form {
+                padding: 1.5rem;
+            }
+
+            .theme-options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- Sidebar -->
+        <aside class="settings-sidebar">
+            <div class="sidebar-header">
+                <!-- Reserved for future filters/menu -->
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="settings-main">
+            <div class="settings-header">
+                <div class="header-content" style="display: flex; align-items: center;">
+                    <a href="{% url 'home' %}" class="back-to-home">
+                        <i class="fas fa-arrow-left"></i> Back to Home
+                    </a>
+                    <div>
+                        <h1>Appearance Settings</h1>
+                        <p>Customize how FINDIT looks and feels</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button type="button" class="btn btn-outline">
+                        <i class="fas fa-sync-alt"></i> Reset to Defaults
+                    </button>
+                </div>
+            </div>
+
+            <form method="post" class="settings-form">
+                {% csrf_token %}
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="form-section">
+                <h2><i class="fas fa-palette"></i> Theme Mode</h2>
+                <p class="text-muted">Choose how FINDIT looks to you</p>
+                
+                <div class="theme-options">
+                    <label class="theme-option">
+                        <input type="radio" name="theme" value="light" 
+                               {% if current_theme == 'light' %}checked{% endif %}>
+                        <div class="theme-content">
+                            <span class="theme-icon">🌞</span>
+                            <div class="theme-name">Light</div>
+                            <div class="theme-desc">Clean, bright interface with light pink accents</div>
+                        </div>
+                    </label>
+                    <label class="theme-option">
+                        <input type="radio" name="theme" value="dark" 
+                               {% if current_theme == 'dark' %}checked{% endif %}>
+                        <div class="theme-content">
+                            <span class="theme-icon">🌙</span>
+                            <div class="theme-name">Dark</div>
+                            <div class="theme-desc">Sleek, low-light interface with pink highlights</div>
+                        </div>
+                    </label>
+                    <label class="theme-option">
+                        <input type="radio" name="theme" value="sunset" 
+                               {% if current_theme == 'sunset' %}checked{% endif %}>
+                        <div class="theme-content">
+                            <span class="theme-icon">🌅</span>
+                            <div class="theme-name">Sunset</div>
+                            <div class="theme-desc">Warm sunset colors with pink and orange tones</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2><i class="fas fa-fill-drip"></i> Accent Color</h2>
+                <p class="text-muted">Choose a custom highlight color for buttons and interactive elements</p>
+                
+                <div class="color-picker-container">
+                    <input type="color" id="accentColor" name="accent_color" 
+                           value="{{ current_accent|default:'#ff6b9e' }}"
+                           style="opacity: 0; position: absolute; width: 1px; height: 1px; border: none;">
+                    
+                    <label for="accentColor" class="color-picker">
+                        <div class="color-preview" id="colorPreview" style="background-color: #ff6b9e;"></div>
+                        <span>Current: Light Pink (#ff6b9e)</span>
+                    </label>
+                    
+                    <div class="color-presets" style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                        <button type="button" class="color-swatch" style="background-color: #ff6b9e;" data-color="#ff6b9e" title="Light Pink"></button>
+                        <button type="button" class="color-swatch" style="background-color: #ff8fab;" data-color="#ff8fab" title="Softer Pink"></button>
+                        <button type="button" class="color-swatch" style="background-color: #ffc2d1;" data-color="#ffc2d1" title="Pale Pink"></button>
+                        <button type="button" class="color-swatch" style="background-color: #ff758f;" data-color="#ff758f" title="Bright Pink"></button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2><i class="fas fa-text-height"></i> Font Size</h2>
+                <p class="text-muted">Adjust the text size for better readability</p>
+                
+                <div class="font-size-options">
+                    {% for value, label in font_sizes %}
+                    <div class="font-size-option">
+                        <input type="radio" name="font_size" id="font_size_{{ value }}" 
+                               value="{{ value }}" 
+                               {% if current_font_size == value %}checked{% endif %}>
+                        <label for="font_size_{{ value }}">{{ label }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h2><i class="fas fa-th-large"></i> Dashboard Layout</h2>
+                <p class="text-muted">Choose how content is displayed on your dashboard</p>
+                
+                <div class="layout-options">
+                    <div class="layout-option">
+                        <input type="radio" name="dashboard_layout" id="layout_grid" 
+                               value="grid" 
+                               {% if form.dashboard_layout.value == 'grid' %}checked{% endif %}>
+                        <div class="layout-preview grid">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                        </div>
+                        <div class="layout-name">Grid View</div>
+                    </div>
+                    
+                    <div class="layout-option">
+                        <input type="radio" name="dashboard_layout" id="layout_list" 
+                               value="list" 
+                               {% if form.dashboard_layout.value == 'list' %}checked{% endif %}>
+                        <div class="layout-preview list">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                        </div>
+                        <div class="layout-name">List View</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <a href="{% url 'home' %}" class="btn btn-outline">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</main>
+</div>
+
+    <style>
+        .color-swatch {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .color-swatch:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--primary-color);
+        }
+        
+        .color-swatch.active {
+            box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--primary-color);
+            transform: scale(1.1);
+        }
+        
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            margin-right: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .color-picker {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .color-picker:hover {
+            border-color: var(--primary-color);
+        }
+    </style>
+    
+    <script>
+        // Update color preview when color picker changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const colorPicker = document.getElementById('accentColor');
+            const colorPreview = document.getElementById('colorPreview');
+            
+            // Handle color swatch clicks
+            document.querySelectorAll('.color-swatch').forEach(swatch => {
+                swatch.addEventListener('click', function() {
+                    const color = this.getAttribute('data-color');
+                    colorPicker.value = color;
+                    colorPreview.style.backgroundColor = color;
+                    applyAccentColor(color);
+                    
+                    // Update active state
+                    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update label
+                    document.querySelector('.color-picker span').textContent = `Current: ${this.getAttribute('title')} (${color})`;
+                });
+                
+                // Set initial active state
+                if (swatch.getAttribute('data-color') === colorPicker.value) {
+                    swatch.classList.add('active');
+                }
+            });
+            
+            // Function to apply accent color
+            function applyAccentColor(color) {
+                const root = document.documentElement;
+                root.style.setProperty('--primary-color', color);
+                root.style.setProperty('--accent-color', color);
+                
+                // Update any elements that use the accent color
+                document.querySelectorAll('.btn-primary, .nav-item.active').forEach(el => {
+                    el.style.setProperty('background-color', color, 'important');
+                });
+                
+                // Save to localStorage for persistence
+                localStorage.setItem('accentColor', color);
+            }
+            
+            if (colorPicker && colorPreview) {
+                // Set initial color from the input value or localStorage
+                const savedColor = localStorage.getItem('accentColor') || '#ff6b9e';
+                colorPicker.value = savedColor;
+                colorPreview.style.backgroundColor = savedColor;
+                applyAccentColor(savedColor);
+                
+                // Update color preview and apply when color picker changes
+                colorPicker.addEventListener('input', function() {
+                    const newColor = this.value;
+                    colorPreview.style.backgroundColor = newColor;
+                    applyAccentColor(newColor);
+                });
+            }
+            
+            // Handle font size changes
+            const fontRadios = document.querySelectorAll('input[name="font_size"]');
+            fontRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.checked) {
+                        applyFontSize(this.value);
+                    }
+                });
+                
+                // Apply initial font size
+                if (radio.checked) {
+                    applyFontSize(radio.value);
+                }
+            });
+            
+            // Apply font size function
+            function applyFontSize(size) {
+                const root = document.documentElement;
+                let baseSize;
+                
+                switch(size) {
+                    case 'small':
+                        baseSize = '14px';
+                        break;
+                    case 'large':
+                        baseSize = '18px';
+                        break;
+                    case 'xlarge':
+                        baseSize = '20px';
+                        break;
+                    default: // medium
+                        baseSize = '16px';
+                }
+                
+                // Apply to root and body to ensure it cascades properly
+                root.style.setProperty('--font-size', baseSize);
+                document.body.style.fontSize = baseSize;
+                
+                // Save to localStorage for persistence
+                localStorage.setItem('fontSize', size);
+                
+                // Force a reflow to ensure the changes take effect
+                document.body.offsetHeight;
+            }
+            
+            // Load saved font size on page load
+            const savedFontSize = localStorage.getItem('fontSize');
+            if (savedFontSize) {
+                const radio = document.querySelector(`input[name="font_size"][value="${savedFontSize}"]`);
+                if (radio) {
+                    radio.checked = true;
+                    applyFontSize(savedFontSize);
+                }
+            }
+            
+            // Apply theme function (matches app.js)
+            function applyTheme(theme) {
+                console.log('Settings: Applying theme:', theme);
+                const root = document.documentElement;
+                const body = document.body;
+                
+                if (theme === 'dark') {
+                    root.style.setProperty('--bg-color', '#1e293b', 'important');
+                    root.style.setProperty('--text-color', '#f8fafc', 'important');
+                    root.style.setProperty('--card-bg', '#334155', 'important');
+                    root.style.setProperty('--primary-color', '#a78bfa', 'important');
+                    root.style.setProperty('--accent-color', '#a78bfa', 'important');
+                    root.style.backgroundColor = '#1e293b';
+                    root.style.color = '#f8fafc';
+                    if (body) {
+                        body.style.backgroundColor = '#1e293b';
+                        body.style.color = '#f8fafc';
+                    }
+                } else if (theme === 'light') {
+                    root.style.setProperty('--bg-color', '#fff0f5', 'important');
+                    root.style.setProperty('--text-color', '#1e293b', 'important');
+                    root.style.setProperty('--card-bg', '#ffffff', 'important');
+                    root.style.setProperty('--primary-color', '#ff6b9e', 'important');
+                    root.style.setProperty('--accent-color', '#ff6b9e', 'important');
+                    root.style.backgroundColor = '#fff0f5';
+                    root.style.color = '#1e293b';
+                    if (body) {
+                        body.style.backgroundColor = '#fff0f5';
+                        body.style.color = '#1e293b';
+                    }
+                } else if (theme === 'sunset') {
+                    // Sunset theme - warm orange, amber, and coral tones
+                    root.style.setProperty('--bg-color', '#fff7ed', 'important');  // Orange-50 (very light orange)
+                    root.style.setProperty('--text-color', '#7c2d12', 'important');  // Orange-900 (dark orange-brown)
+                    root.style.setProperty('--card-bg', '#ffedd5', 'important');  // Orange-100 (light peach)
+                    root.style.setProperty('--primary-color', '#f97316', 'important');  // Orange-500 (vibrant orange)
+                    root.style.setProperty('--accent-color', '#fb923c', 'important');  // Orange-400 (bright orange)
+                    root.style.setProperty('--secondary-color', '#fdba74', 'important');  // Orange-300 (light orange)
+                    root.style.backgroundColor = '#fff7ed';
+                    root.style.color = '#7c2d12';
+                    if (body) {
+                        body.style.backgroundColor = '#fff7ed';
+                        body.style.color = '#7c2d12';
+                    }
+                }
+                
+                // Save to localStorage for persistence
+                localStorage.setItem('theme', theme);
+                
+                // Force a reflow to ensure the changes take effect
+                document.body.offsetHeight;
+            }
+            
+            // Handle theme selection
+            document.querySelectorAll('.theme-option input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.checked) {
+                        applyTheme(this.value);
+                    }
+                });
+                
+                // Set initial theme
+                if (radio.checked) {
+                    applyTheme(radio.value);
+                }
+            });
+            
+            // Load saved theme from localStorage on page load
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                const radio = document.querySelector(`input[type="radio"][value="${savedTheme}"]`);
+                if (radio) {
+                    radio.checked = true;
+                    applyTheme(savedTheme);
+                }
+            }
+
+            // Handle form submission
+            const form = document.querySelector('.settings-form');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    // Show loading state
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    const originalBtnText = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                    
+                    try {
+                        const formData = new FormData(form);
+                        // Add the current accent color to the form data
+                        const accentColor = document.getElementById('accentColor').value;
+                        formData.set('accent_color', accentColor);
+                        
+                        const response = await fetch(window.location.href, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            }
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            // Show success message
+                            showMessage('Settings saved successfully!', 'success');
+                            
+                            // Save to localStorage for immediate application
+                            if (result.theme) {
+                                localStorage.setItem('theme', result.theme);
+                                applyTheme(result.theme);
+                            }
+                            
+                            if (result.accent_color) {
+                                localStorage.setItem('accentColor', result.accent_color);
+                                applyAccentColor(result.accent_color);
+                                const colorPreview = document.getElementById('colorPreview');
+                                if (colorPreview) {
+                                    colorPreview.style.backgroundColor = result.accent_color;
+                                }
+                            }
+                            
+                            if (result.font_size) {
+                                localStorage.setItem('fontSize', result.font_size);
+                                applyFontSize(result.font_size);
+                            }
+                        } else {
+                            throw new Error(result.message || 'Failed to save settings');
+                        }
+                    } catch (error) {
+                        console.error('Error saving settings:', error);
+                        showMessage('Failed to save settings. Please try again.', 'error');
+                    } finally {
+                        // Reset button state
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                    }
+                });
+            }
+            
+            // Function to show status messages
+            function showMessage(message, type = 'success') {
+                // Remove any existing messages
+                const existingMessages = document.querySelectorAll('.status-message');
+                existingMessages.forEach(msg => msg.remove());
+                
+                // Create and show new message
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `status-message ${type}`;
+                messageDiv.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                    <span>${message}</span>
+                    <button class="close-message">&times;</button>
+                `;
+                
+                // Add to the top of the form
+                const form = document.querySelector('.settings-form');
+                if (form) {
+                    form.insertBefore(messageDiv, form.firstChild);
+                    
+                    // Auto-hide after 5 seconds
+                    const timer = setTimeout(() => {
+                        messageDiv.style.opacity = '0';
+                        setTimeout(() => messageDiv.remove(), 300);
+                    }, 5000);
+                    
+                    // Close button handler
+                    const closeBtn = messageDiv.querySelector('.close-message');
+                    closeBtn.addEventListener('click', () => {
+                        clearTimeout(timer);
+                        messageDiv.remove();
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,375 @@
+{% extends 'admin_dashboard/base.html' %}
+
+{% block content %}
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Building Management</h1>
+    <button type="button" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#addBuildingModal">
+        <i class="fas fa-plus fa-sm text-white-50"></i> Add New Building
+    </button>
+</div>
+
+<!-- Content Row -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Buildings List</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for building in buildings %}
+                            <tr>
+                                <td>{{ building.name }}</td>
+                                <td>{{ building.description|default:"No description"|truncatechars:50 }}</td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-primary edit-building" data-id="{{ building.id }}">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-danger delete-building" data-id="{{ building.id }}">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">No buildings found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<!-- Custom styles for this page -->
+<style>
+    .action-buttons .btn {
+        margin-right: 5px;
+    }
+    .action-buttons .btn:last-child {
+        margin-right: 0;
+    }
+    .table td, .table th {
+        vertical-align: middle;
+    }
+    .no-wrap {
+        white-space: nowrap;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Page level plugins -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Add Building Modal -->
+<div class="modal fade" id="addBuildingModal" tabindex="-1" role="dialog" aria-labelledby="addBuildingModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addBuildingModalLabel">Add New Building</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addBuildingForm" onsubmit="return false;">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="buildingName">Building Name</label>
+                        <input type="text" class="form-control" id="buildingName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="buildingDescription">Description</label>
+                        <textarea class="form-control" id="buildingDescription" name="description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Building</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Debug function to log detailed information
+function logDebugInfo(type, data) {
+    console.group(`Debug: ${type}`);
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('Data:', data);
+    if (data instanceof Error) {
+        console.error('Error Stack:', data.stack);
+    } else if (data instanceof Response) {
+        console.log('Response Status:', data.status);
+        console.log('Response Headers:', Object.fromEntries(data.headers.entries()));
+    }
+    console.groupEnd();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    if (!csrfToken) return;
+    
+    // Simple event delegation for all buttons
+    document.addEventListener('click', async (e) => {
+        // Handle edit buttons
+        if (e.target.closest('.edit-building')) {
+            e.preventDefault();
+            const btn = e.target.closest('.edit-building');
+            const row = btn.closest('tr');
+            const id = btn.dataset.id;
+            const name = row.cells[0].textContent;
+            const desc = row.cells[1].textContent.replace('No description', '').trim();
+            
+            document.getElementById('buildingName').value = name;
+            document.getElementById('buildingDescription').value = desc;
+            document.getElementById('addBuildingForm').dataset.editId = id;
+            document.getElementById('addBuildingModalLabel').textContent = 'Edit Building';
+            document.querySelector('#addBuildingForm button[type="submit"]').textContent = 'Update Building';
+            
+            new bootstrap.Modal(document.getElementById('addBuildingModal')).show();
+        }
+        
+        // Handle delete buttons
+        if (e.target.closest('.delete-building')) {
+            e.preventDefault();
+            const btn = e.target.closest('.delete-building');
+            const row = btn.closest('tr');
+            const id = btn.dataset.id;
+            const name = row.cells[0].textContent;
+            
+            if (!confirm(`Delete ${name}?`)) return;
+            
+            try {
+                const response = await fetch(`/admin_dashboard/buildings/delete/${id}/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        row.remove();
+                        alert('Deleted!');
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                } else {
+                    alert('Server error: ' + response.status);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+    });
+    
+    // Helper to show alerts
+    function showAlert(message, type = 'success') {
+        console.log(`Showing alert [${type}]:`, message);
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+        
+        // Remove any existing alerts
+        document.querySelectorAll('.alert').forEach(alert => alert.remove());
+        
+        // Add new alert
+        const container = document.querySelector('.container-fluid');
+        if (container) {
+            container.insertAdjacentHTML('afterbegin', alertHtml);
+        } else {
+            document.body.insertAdjacentHTML('afterbegin', alertHtml);
+        }
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            const alert = document.querySelector('.alert');
+            if (alert) {
+                try {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                } catch (e) {
+                    console.error('Error closing alert:', e);
+                    alert.remove();
+                }
+            }
+        }, 5000);
+    }
+
+
+
+    // Reset form when modal is hidden
+    document.getElementById('addBuildingModal').addEventListener('hidden.bs.modal', function () {
+        const form = document.getElementById('addBuildingForm');
+        form.reset();
+        delete form.dataset.editId;
+        form.removeAttribute('action');
+        document.getElementById('addBuildingModalLabel').textContent = 'Add New Building';
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.textContent = 'Save Building';
+        submitBtn.classList.remove('btn-warning');
+        submitBtn.classList.add('btn-primary');
+    });
+
+    // Form submission
+    const form = document.getElementById('addBuildingForm');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            console.log('Form submitted!');
+            
+            const formData = new FormData(form);
+            const isEdit = !!form.dataset.editId;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            
+            if (!submitBtn) {
+                console.error('Submit button not found');
+                return;
+            }
+            
+            const originalBtnText = submitBtn.innerHTML;
+            
+            try {
+                // Validate required fields
+                const name = formData.get('name')?.toString().trim() || '';
+                console.log('Building name:', name);
+                
+                if (!name) {
+                    alert('Building name is required');
+                    return;
+                }
+                
+                // Update button to show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = 'Processing...';
+                
+                // Always use add URL
+                const url = '/admin_dashboard/buildings/add/';
+                
+                // Prepare the request data
+                const requestData = {
+                    name: name,
+                    description: formData.get('description')?.toString().trim() || ''
+                };
+                
+                // Add edit ID if editing
+                if (isEdit) {
+                    requestData.edit_id = form.dataset.editId;
+                }
+                
+                console.log('Request data:', requestData);
+                console.log('CSRF token:', csrfToken);
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(requestData),
+                    credentials: 'same-origin'
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+                
+                const responseText = await response.text();
+                console.log('Raw response:', responseText);
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('Failed to parse JSON:', parseError);
+                    throw new Error('Server returned invalid JSON: ' + responseText.substring(0, 200));
+                }
+                
+                console.log('Parsed response data:', data);
+                
+                if (!response.ok) {
+                    throw new Error(data.error || `Server returned status ${response.status}`);
+                }
+                
+                if (data.success) {
+                    if (!isEdit) {
+                        // Add new row to table
+                        const tbody = document.querySelector('tbody');
+                        const newRow = document.createElement('tr');
+                        newRow.innerHTML = `
+                            <td>${data.building.name}</td>
+                            <td>${data.building.description || 'No description'}</td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-primary edit-building" data-id="${data.building.id}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a href="#" class="btn btn-sm btn-danger delete-building" data-id="${data.building.id}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            </td>
+                        `;
+                        
+                        // Remove "No buildings found" row if it exists
+                        const noDataRow = tbody.querySelector('td[colspan="3"]');
+                        if (noDataRow) {
+                            noDataRow.closest('tr').remove();
+                        }
+                        
+                        tbody.appendChild(newRow);
+                        alert('Building added successfully!');
+                    } else {
+                        // Update existing row
+                        const editingRow = document.querySelector(`[data-id="${form.dataset.editId}"]`).closest('tr');
+                        if (editingRow) {
+                            editingRow.cells[0].textContent = data.building.name;
+                            editingRow.cells[1].textContent = data.building.description || 'No description';
+                        }
+                        alert('Building updated successfully!');
+                    }
+                    
+                    // Close modal and reset form
+                    const modalEl = document.getElementById('addBuildingModal');
+                    const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    bsModal.hide();
+                } else {
+                    throw new Error(data.error || 'Failed to save building');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error: ' + error.message);
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        });
+    } else {
+        console.error('Form not found!');
+    }
+});
+</script>
+
+{% endblock %}
+</body>
+</html>

@@ -1,0 +1,379 @@
+{% extends 'admin_dashboard/base.html' %}
+
+{% block extra_css %}
+<style>
+.chart-area {
+    position: relative;
+    height: 20rem;
+    width: 100%;
+}
+
+.chart-pie {
+    position: relative;
+    height: 20rem;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .chart-pie {
+        height: 25rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Analytics Dashboard</h1>
+    <div>
+        <a href="#" class="btn btn-sm btn-primary shadow-sm" id="exportPdf">
+            <i class="fas fa-download fa-sm text-white-50"></i> Export Report
+        </a>
+    </div>
+</div>
+
+<!-- Content Row -->
+<div class="row">
+    <!-- Total Users Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Users</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_users|default:'0' }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Users This Week Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            New Users (This Week)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ new_users_this_week|default:'0' }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-plus fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Users Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Active Users (Today)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_users_today|default:'0' }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-check fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Buildings Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Total Buildings</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_buildings|default:'0' }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-building fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content Row -->
+<div class="row">
+    <!-- User Registration Chart -->
+    <div class="col-xl-8 col-lg-7">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">User Registrations (Last 7 Days)</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-area">
+                    <canvas id="userRegistrationChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Building Distribution Chart -->
+    <div class="col-xl-4 col-lg-5">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Building Distribution</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-pie pt-4">
+                    <canvas id="buildingDistributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Activity</h6>
+                <a href="#" class="btn btn-sm btn-primary">View All Activity</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="activityTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                                <th>Timestamp</th>
+                                <th>IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Sample data - replace with actual data -->
+                            <tr>
+                                <td>admin@example.com</td>
+                                <td><span class="badge badge-success">Login</span></td>
+                                <td>User logged in successfully</td>
+                                <td>Just now</td>
+                                <td>192.168.1.1</td>
+                            </tr>
+                            <tr>
+                                <td>johndoe@example.com</td>
+                                <td><span class="badge badge-info">Update</span></td>
+                                <td>Updated profile information</td>
+                                <td>5 minutes ago</td>
+                                <td>192.168.1.2</td>
+                            </tr>
+                            <tr>
+                                <td>admin@example.com</td>
+                                <td><span class="badge badge-warning">Create</span></td>
+                                <td>Created new building 'Science Lab'</td>
+                                <td>1 hour ago</td>
+                                <td>192.168.1.1</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Set new default font family and font color to mimic Bootstrap's default styling
+Chart.defaults.global.defaultFontFamily = 'Nunito, -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+Chart.defaults.global.defaultFontColor = '#858796';
+
+// User Registration Chart
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize User Registration Chart
+    var ctx = document.getElementById('userRegistrationChart');
+    if (ctx) {
+        var userRegistrationChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: JSON.parse('{{ user_registrations.labels|safe|escapejs }}'),
+                datasets: [{
+                    label: 'Users',
+                    lineTension: 0.3,
+                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                    borderColor: 'rgba(78, 115, 223, 1)',
+                    pointRadius: 3,
+                    pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                    pointBorderColor: 'rgba(78, 115, 223, 1)',
+                    pointHoverRadius: 3,
+                    pointHoverBackgroundColor: 'rgba(78, 115, 223, 1)',
+                    pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
+                    pointHitRadius: 10,
+                    pointBorderWidth: 2,
+                    data: JSON.parse('{{ user_registrations.data|safe|escapejs }}')
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 10,
+                        right: 25,
+                        top: 25,
+                        bottom: 0
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        gridLines: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            maxTicksLimit: 7
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            maxTicksLimit: 5,
+                            padding: 10,
+                            callback: function(value) {
+                                if (Number.isInteger(value)) {
+                                    return value;
+                                }
+                            }
+                        },
+                        gridLines: {
+                            color: "rgb(234, 236, 244)",
+                            zeroLineColor: "rgb(234, 236, 244)",
+                            drawBorder: false,
+                            borderDash: [2],
+                            zeroLineBorderDash: [2]
+                        }
+                    }]
+                },
+                legend: {
+                    display: false
+                },
+                tooltips: {
+                    backgroundColor: "rgb(255,255,255)",
+                    bodyFontColor: "#858796",
+                    titleMarginBottom: 10,
+                    titleFontColor: '#6e707e',
+                    titleFontSize: 14,
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    xPadding: 15,
+                    yPadding: 15,
+                    displayColors: false,
+                    intersect: false,
+                    mode: 'index',
+                    caretPadding: 10,
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            var label = data.datasets[tooltipItem.datasetIndex].label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (tooltipItem.yLabel !== null) {
+                                label += tooltipItem.yLabel;
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Building Distribution Chart
+    var ctx2 = document.getElementById('buildingDistributionChart');
+    if (ctx2) {
+        var buildingDistributionChart = new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: JSON.parse('{{ building_stats.labels|default:"[]"|escapejs }}'),
+                datasets: [{
+                    data: JSON.parse('{{ building_stats.data|default:"[]"|escapejs }}'),
+                    backgroundColor: [
+                        '#4e73df',
+                        '#1cc88a',
+                        '#36b9cc',
+                        '#f6c23e',
+                        '#e74a3b',
+                        '#858796',
+                        '#5a5c69'
+                    ],
+                    hoverBackgroundColor: [
+                        '#2e59d9',
+                        '#17a673',
+                        '#2c9faf',
+                        '#dda20a',
+                        '#be2617',
+                        '#6c757d',
+                        '#4e73df'
+                    ],
+                    hoverBorderColor: 'rgba(234, 236, 244, 1)'
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                tooltips: {
+                    backgroundColor: 'rgb(255,255,255)',
+                    bodyFontColor: '#858796',
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    xPadding: 15,
+                    yPadding: 15,
+                    displayColors: false,
+                    caretPadding: 10
+                },
+                legend: {
+                    display: true,
+                    position: 'right',
+                    labels: {
+                        padding: 15,
+                        usePointStyle: true
+                    }
+                },
+                cutoutPercentage: 70
+            }
+        });
+    }
+
+    // Initialize DataTable
+    if ($.fn.DataTable.isDataTable('#activityTable')) {
+        $('#activityTable').DataTable().destroy();
+    }
+    
+    $('#activityTable').DataTable({
+        order: [[3, 'desc']],
+        pageLength: 5,
+        lengthChange: false,
+        searching: false,
+        info: false,
+        responsive: true
+    });
+
+    // PDF Export Button Handler
+    const exportPdfBtn = document.getElementById('exportPdf');
+    if (exportPdfBtn) {
+        exportPdfBtn.addEventListener('click', function() {
+            // Implement PDF export
+            alert('Export to PDF functionality will be implemented here');
+        });
+    }
+}); // Close DOMContentLoaded
+</script>
+{% endblock %}
