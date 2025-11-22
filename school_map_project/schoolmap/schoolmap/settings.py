@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
     'mapapp',
     'admin_dashboard.apps.AdminDashboardConfig',
 ]
@@ -126,9 +128,20 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Cloudinary Configuration
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+cloudinary.config(
+    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME', 'your-cloud-name'),
+    api_key=os.environ.get('CLOUDINARY_API_KEY', 'your-api-key'),
+    api_secret=os.environ.get('CLOUDINARY_API_SECRET', 'your-api-secret')
+)
+
 # Media files (User uploaded files)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # Create media directory if it doesn't exist
 import os
