@@ -447,17 +447,7 @@
                     
                     <div class="form-group">
                         <label for="id_grade_section">Grade Level - Section</label>
-                        <select name="grade_section" id="id_grade_section" required>
-                            <option value="">Select Grade & Section</option>
-                            <option value="Grade 7-A">Grade 7-A</option>
-                            <option value="Grade 7-B">Grade 7-B</option>
-                            <option value="Grade 8-A">Grade 8-A</option>
-                            <option value="Grade 8-B">Grade 8-B</option>
-                            <option value="Grade 9-A">Grade 9-A</option>
-                            <option value="Grade 9-B">Grade 9-B</option>
-                            <option value="Grade 10-A">Grade 10-A</option>
-                            <option value="Grade 10-B">Grade 10-B</option>
-                        </select>
+                        <input type="text" name="grade_section" id="id_grade_section" placeholder="e.g., 10 - Newton" required>
                         {% if student_form.grade_section.errors %}
                             <div class="error">{{ student_form.grade_section.errors }}</div>
                         {% endif %}
@@ -537,6 +527,14 @@
                         </select>
                         {% if teacher_form.department.errors %}
                             <div class="error">{{ teacher_form.department.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="teacher_grade_level">Grade Level Teaching</label>
+                        <input type="text" name="grade_level" id="teacher_grade_level" placeholder="e.g., Grade 7, Grade 8-10, All Grades" required>
+                        {% if teacher_form.grade_level.errors %}
+                            <div class="error">{{ teacher_form.grade_level.errors }}</div>
                         {% endif %}
                     </div>
                     
