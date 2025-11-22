@@ -235,6 +235,25 @@
             text-decoration: underline;
         }
         
+        .password-field {
+            position: relative;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+        
+        .password-toggle:hover {
+            color: #ff6b9e;
+        }
+        
         .user-type-label {
             display: inline-block;
             background: #f0e5ff;
@@ -461,18 +480,20 @@
                         {% endif %}
                     </div>
                     
-                    <div class="form-group">
+                    <div class="form-group password-field">
                         <label for="id_password1">Password</label>
                         <input type="password" name="password1" id="id_password1" placeholder="Enter your password" required>
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('id_password1')"></i>
                         <p class="password-note">Password must be at least 8 characters long</p>
                         {% if student_form.password1.errors %}
                             <div class="error">{{ student_form.password1.errors }}</div>
                         {% endif %}
                     </div>
                     
-                    <div class="form-group">
+                    <div class="form-group password-field">
                         <label for="id_password2">Confirm Password</label>
                         <input type="password" name="password2" id="id_password2" placeholder="Confirm your password" required>
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('id_password2')"></i>
                         {% if student_form.password2.errors %}
                             <div class="error">{{ student_form.password2.errors }}</div>
                         {% endif %}
@@ -546,18 +567,20 @@
                         {% endif %}
                     </div>
                     
-                    <div class="form-group">
+                    <div class="form-group password-field">
                         <label for="teacher_password1">Password</label>
                         <input type="password" name="password1" id="teacher_password1" placeholder="Enter your password" required>
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('teacher_password1')"></i>
                         <p class="password-note">Password must be at least 8 characters long</p>
                         {% if teacher_form.password1.errors %}
                             <div class="error">{{ teacher_form.password1.errors }}</div>
                         {% endif %}
                     </div>
                     
-                    <div class="form-group">
+                    <div class="form-group password-field">
                         <label for="teacher_password2">Confirm Password</label>
                         <input type="password" name="password2" id="teacher_password2" placeholder="Confirm your password" required>
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('teacher_password2')"></i>
                         {% if teacher_form.password2.errors %}
                             <div class="error">{{ teacher_form.password2.errors }}</div>
                         {% endif %}
@@ -646,6 +669,21 @@
             
             // Add additional validation if needed
         });
+        
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = field.nextElementSibling;
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
     </script>
 </body>
 </html>

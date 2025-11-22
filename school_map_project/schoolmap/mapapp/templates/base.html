@@ -185,7 +185,7 @@
         <a href="{% url 'home' %}" class="nav-logo">FINDIT</a>
         <div class="nav-links">
             {% if user.is_authenticated %}
-                {% if user.is_staff %}
+                {% if user.is_superuser %}
                     <a href="{% url 'admin_dashboard:dashboard' %}" class="nav-link">
                         <i class="fas fa-tachometer-alt"></i> Admin Dashboard
                     </a>

@@ -14,7 +14,8 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 
 from django.contrib.auth.models import User
-from mapapp.models import BuildingInfo, UserPreferences  # Import models from mapapp
+from mapapp.models import BuildingInfo, UserPreferences, ActivityLog  # Import models from mapapp
+from mapapp.utils import log_activity
 from django.views.decorators.http import require_http_methods
 import json
 
@@ -37,6 +38,7 @@ from django.core.files.base import ContentFile
 def dashboard(request):
     # Get recent user activity
     recent_users = User.objects.order_by('-date_joined')[:5]
+    recent_activities = ActivityLog.objects.select_related('user')[:10]
     
     # Get building statistics
     total_buildings = BuildingInfo.objects.count()
@@ -46,13 +48,16 @@ def dashboard(request):
     new_users_week = User.objects.filter(
         date_joined__gte=timezone.now() - timedelta(days=7)
     ).count()
+    active_users = User.objects.filter(is_active=True).count()
     
     context = {
         'active_page': 'dashboard',
         'recent_users': recent_users,
+        'recent_activities': recent_activities,
         'total_buildings': total_buildings,
         'total_users': total_users,
         'new_users_this_week': new_users_week,
+        'active_users': active_users,
     }
     return render(request, 'admin_dashboard/dashboard.html', context)
 
@@ -67,6 +72,8 @@ def toggle_user_status(request, user_id):
         user.is_active = not user.is_active
         user.save()
         status = 'activated' if user.is_active else 'deactivated'
+        action = 'user_activated' if user.is_active else 'user_deactivated'
+        log_activity(request.user, action, f'Admin {request.user.username} {status} user {user.username}', request)
         messages.success(request, f"User {user.username} has been {status} successfully.")
     
     return redirect('admin_dashboard:user_management')
@@ -148,6 +155,7 @@ def add_building(request):
                 name=name,
                 description=description
             )
+            log_activity(request.user, 'building_added', f'Admin {request.user.username} added building: {name}', request)
         
         return JsonResponse({
             'success': True,

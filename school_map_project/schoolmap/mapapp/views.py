@@ -5,6 +5,7 @@ from django.contrib import messages
 from .models import BuildingInfo, UserPreferences, FindUsPoster, HomePageContent
 from .forms import FindUsPosterForm, UserPreferencesForm
 from django.http import JsonResponse
+from .utils import log_activity
 
 @login_required
 def home(request):
@@ -167,12 +168,18 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('home')
+            log_activity(user, 'user_login', f'User {user.username} logged in', request)
+            if user.is_superuser:
+                return redirect('admin_dashboard:dashboard')
+            else:
+                return redirect('home')
         else:
             messages.error(request, 'Invalid username or password.')
     return render(request, 'login.html')
 
 def logout_view(request):
+    if request.user.is_authenticated:
+        log_activity(request.user, 'user_logout', f'User {request.user.username} logged out', request)
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
     return redirect('landing')

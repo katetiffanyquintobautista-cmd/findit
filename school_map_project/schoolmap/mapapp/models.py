@@ -82,6 +82,31 @@ class FindUsPoster(models.Model):
                 return match.group(1)
         return None
 
+class ActivityLog(models.Model):
+    ACTION_CHOICES = [
+        ('user_registered', 'User Registered'),
+        ('user_login', 'User Login'),
+        ('user_logout', 'User Logout'),
+        ('profile_updated', 'Profile Updated'),
+        ('building_added', 'Building Added'),
+        ('building_updated', 'Building Updated'),
+        ('building_deleted', 'Building Deleted'),
+        ('user_activated', 'User Activated'),
+        ('user_deactivated', 'User Deactivated'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    action = models.CharField(max_length=50, choices=ACTION_CHOICES)
+    description = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-timestamp']
+    
+    def __str__(self):
+        return f"{self.get_action_display()} - {self.timestamp.strftime('%Y-%m-%d %H:%M')}"
+
 class HomePageContent(models.Model):
     # Main content sections
     site_title = models.CharField(max_length=100, default="FINDIT - School Map")
