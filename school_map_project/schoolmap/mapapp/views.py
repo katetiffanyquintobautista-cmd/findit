@@ -159,7 +159,46 @@ def landing(request):
     return render(request, 'landing.html')
 
 def register(request):
-    return render(request, 'register.html')
+    from django.contrib.auth.models import User
+    from .forms import StudentRegistrationForm, TeacherRegistrationForm
+    from django.contrib.auth import login
+    from .utils import log_activity
+    
+    if request.method == 'POST':
+        if 'student_submit' in request.POST:
+            form = StudentRegistrationForm(request.POST)
+            if form.is_valid():
+                user = form.save()
+                # Create user preferences
+                UserPreferences.objects.get_or_create(user=user)
+                # Log activity
+                log_activity(user, 'user_registered', f'New student {user.username} registered', request)
+                # Login user automatically
+                login(request, user)
+                messages.success(request, 'Registration successful! Welcome to FINDIT.')
+                return redirect('home')
+        elif 'teacher_submit' in request.POST:
+            form = TeacherRegistrationForm(request.POST)
+            if form.is_valid():
+                user = form.save()
+                # Create user preferences
+                UserPreferences.objects.get_or_create(user=user)
+                # Log activity
+                log_activity(user, 'user_registered', f'New teacher {user.username} registered', request)
+                # Login user automatically
+                login(request, user)
+                messages.success(request, 'Registration successful! Welcome to FINDIT.')
+                return redirect('home')
+    
+    student_form = StudentRegistrationForm()
+    teacher_form = TeacherRegistrationForm()
+    
+    context = {
+        'student_form': student_form,
+        'teacher_form': teacher_form,
+        'active_tab': 'student'
+    }
+    return render(request, 'register.html', context)
 
 def login_view(request):
     if request.method == 'POST':

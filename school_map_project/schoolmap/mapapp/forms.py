@@ -63,22 +63,12 @@ class StudentRegistrationForm(UserCreationForm):
     
     class Meta:
         model = User
-        fields = ('username', 'email', 'password1', 'password2', 'full_name', 'lrn', 'grade_section')
+        fields = ('username', 'email', 'password1', 'password2')
         widgets = {
             'username': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Choose a username',
                 'autocomplete': 'username'
-            }),
-            'password1': forms.PasswordInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Create a password',
-                'autocomplete': 'new-password'
-            }),
-            'password2': forms.PasswordInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Confirm your password',
-                'autocomplete': 'new-password'
             }),
         }
     
@@ -87,6 +77,14 @@ class StudentRegistrationForm(UserCreationForm):
         if User.objects.filter(username=username).exists():
             raise ValidationError("A user with that username already exists.")
         return username
+    
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data['email']
+        user.first_name = self.cleaned_data['full_name']
+        if commit:
+            user.save()
+        return user
 
 
 class TeacherRegistrationForm(UserCreationForm):
@@ -148,22 +146,12 @@ class TeacherRegistrationForm(UserCreationForm):
     
     class Meta:
         model = User
-        fields = ('username', 'email', 'password1', 'password2', 'full_name', 'faculty_id', 'department', 'grade_level')
+        fields = ('username', 'email', 'password1', 'password2')
         widgets = {
             'username': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Choose a username',
                 'autocomplete': 'username'
-            }),
-            'password1': forms.PasswordInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Create a password',
-                'autocomplete': 'new-password'
-            }),
-            'password2': forms.PasswordInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Confirm your password',
-                'autocomplete': 'new-password'
             }),
         }
     
@@ -172,6 +160,14 @@ class TeacherRegistrationForm(UserCreationForm):
         if User.objects.filter(username=username).exists():
             raise ValidationError("A user with that username already exists.")
         return username
+    
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data['email']
+        user.first_name = self.cleaned_data['full_name']
+        if commit:
+            user.save()
+        return user
 
 
 
