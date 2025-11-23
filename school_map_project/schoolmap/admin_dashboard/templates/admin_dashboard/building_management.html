@@ -215,6 +215,53 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, 5000);
     }
+    
+    // Handle form submission
+    document.getElementById('addBuildingForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const editId = e.target.dataset.editId;
+        const url = editId ? `/admin_dashboard/buildings/edit/${editId}/` : '/admin_dashboard/buildings/add/';
+        
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRFToken': csrfToken }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    showAlert(editId ? 'Building updated successfully!' : 'Building added successfully!');
+                    bootstrap.Modal.getInstance(document.getElementById('addBuildingModal')).hide();
+                    location.reload();
+                } else {
+                    showAlert('Error: ' + data.error, 'danger');
+                }
+            } else {
+                showAlert('Server error: ' + response.status, 'danger');
+            }
+        } catch (error) {
+            showAlert('Error: ' + error.message, 'danger');
+        }
+    });
+    
+    // Reset modal when closed
+    document.getElementById('addBuildingModal').addEventListener('hidden.bs.modal', () => {
+        document.getElementById('addBuildingForm').reset();
+        delete document.getElementById('addBuildingForm').dataset.editId;
+        document.getElementById('addBuildingModalLabel').textContent = 'Add New Building';
+        document.querySelector('#addBuildingForm button[type="submit"]').textContent = 'Save Building';
+    });
+});
+</script>
+{% endblock %}lert.remove();
+                }
+            }
+        }, 5000);
+    }
 
 
 
