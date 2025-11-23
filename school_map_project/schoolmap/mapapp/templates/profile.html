@@ -664,8 +664,16 @@
         if (profilePictureInput) {
             profilePictureInput.addEventListener('change', function() {
                 if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    
+                    // Validate file type
+                    if (!file.type.startsWith('image/')) {
+                        alert('Please select a valid image file.');
+                        return;
+                    }
+                    
                     const formData = new FormData();
-                    formData.append('profile_picture', this.files[0]);
+                    formData.append('profile_picture', file);
                     formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
                     
                     // Show preview immediately
@@ -673,20 +681,24 @@
                     reader.onload = function(e) {
                         const avatar = document.querySelector('.profile-avatar');
                         const existingImg = avatar.querySelector('img');
+                        const initials = avatar.querySelector('.avatar-initials');
+                        
                         if (existingImg) {
                             existingImg.src = e.target.result;
                         } else {
-                            const initials = avatar.querySelector('.avatar-initials');
                             if (initials) initials.style.display = 'none';
                             
                             const img = document.createElement('img');
                             img.src = e.target.result;
                             img.alt = 'Profile Picture';
                             img.id = 'profileImage';
+                            img.style.width = '100%';
+                            img.style.height = '100%';
+                            img.style.objectFit = 'cover';
                             avatar.insertBefore(img, avatar.querySelector('.profile-upload'));
                         }
                     };
-                    reader.readAsDataURL(this.files[0]);
+                    reader.readAsDataURL(file);
                     
                     // Upload via AJAX
                     fetch(window.location.href, {
@@ -699,13 +711,14 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            console.log('Profile picture uploaded successfully');
+                            location.reload();
                         } else {
-                            console.error('Upload failed:', data.error);
+                            alert('Upload failed: ' + (data.error || 'Unknown error'));
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
+                        alert('Upload failed. Please try again.');
                     });
                 }
             });
