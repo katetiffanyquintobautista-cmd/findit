@@ -2,7 +2,9 @@
 # exit on error
 set -o errexit
 
-pip install -r requirements.txt
+# Use pip cache for faster builds
+pip install --upgrade pip
+pip install -r requirements.txt --cache-dir /opt/render/project/.pip-cache
 
 cd school_map_project/schoolmap
 python manage.py collectstatic --no-input
