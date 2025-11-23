@@ -77,6 +77,13 @@ class FindUsPoster(models.Model):
         """Check if this poster has any content"""
         return bool(self.poster_image or self.video_file or self.youtube_url)
     
+    def save(self, *args, **kwargs):
+        """Override save to ensure only one active poster"""
+        if self.is_active:
+            # Deactivate all other posters
+            FindUsPoster.objects.exclude(pk=self.pk).update(is_active=False)
+        super().save(*args, **kwargs)
+    
     def get_youtube_embed_id(self):
         """Extract YouTube video ID from URL for embedding"""
         if not self.youtube_url:
