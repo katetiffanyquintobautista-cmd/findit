@@ -24,6 +24,7 @@ SECRET_KEY = 'django-insecure-)m(bv)qzo$*=^^72^oej9!vgidkphx2ub8gmp+wqydp=uad%b-
 
 # SECURITY WARNING: don't run with debug turned on in production!
 import os
+# Force deployment update
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['*', '.onrender.com']  # Update this with your domain
