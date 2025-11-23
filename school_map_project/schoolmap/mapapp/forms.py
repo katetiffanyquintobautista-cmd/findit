@@ -194,3 +194,34 @@ class FindUsPosterForm(forms.ModelForm):
                 'placeholder': 'https://www.youtube.com/watch?v=VIDEO_ID'
             })
         }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        poster_image = cleaned_data.get('poster_image')
+        video_file = cleaned_data.get('video_file')
+        youtube_url = cleaned_data.get('youtube_url')
+        
+        if not any([poster_image, video_file, youtube_url]):
+            raise ValidationError('Please provide at least one content type: an image, video file, or YouTube URL.')
+        
+        return cleaned_data
+    
+    def clean_youtube_url(self):
+        youtube_url = self.cleaned_data.get('youtube_url')
+        if youtube_url:
+            import re
+            patterns = [
+                r'(?:youtube\.com/watch\?v=|youtu\.be/)([a-zA-Z0-9_-]+)',
+                r'youtube\.com/embed/([a-zA-Z0-9_-]+)'
+            ]
+            
+            valid = False
+            for pattern in patterns:
+                if re.search(pattern, youtube_url):
+                    valid = True
+                    break
+            
+            if not valid:
+                raise ValidationError('Please enter a valid YouTube URL (e.g., https://www.youtube.com/watch?v=VIDEO_ID)')
+        
+        return youtube_url

@@ -96,8 +96,16 @@
             <!-- Poster Display -->
             {% if active_poster and active_poster.poster_image %}
                 <div class="poster-display">
-                    <img src="{% if active_poster.poster_image.url %}{{ active_poster.poster_image.url }}{% else %}{% static 'img/placeholder.png' %}{% endif %}" alt="{{ active_poster.title }}" class="poster-image" onerror="this.src='{% static 'img/placeholder.png' %}'">
-                    <p class="poster-title">{{ active_poster.title }}</p>
+                    <div class="poster-wrapper">
+                        <img src="{{ active_poster.poster_image.url }}" 
+                             alt="{{ active_poster.title }}" 
+                             class="poster-image" 
+                             loading="lazy"
+                             onerror="this.parentElement.innerHTML='<div class=\'image-error\'>Image not available</div>';">
+                    </div>
+                    {% if active_poster.title %}
+                        <p class="poster-title">{{ active_poster.title }}</p>
+                    {% endif %}
                 </div>
             {% endif %}
             
@@ -107,10 +115,11 @@
                     <div class="video-display">
                         <h3>Campus Video Tour</h3>
                         <div class="video-container">
-                            <iframe src="https://www.youtube.com/embed/{{ active_poster.get_youtube_embed_id }}" 
+                            <iframe src="https://www.youtube.com/embed/{{ active_poster.get_youtube_embed_id }}?rel=0&modestbranding=1" 
                                     frameborder="0" 
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                    allowfullscreen>
+                                    allowfullscreen
+                                    loading="lazy">
                             </iframe>
                         </div>
                     </div>
@@ -118,9 +127,10 @@
                     <div class="video-display">
                         <h3>Campus Video Tour</h3>
                         <div class="video-container">
-                            <video controls preload="metadata">
-                                <source src="{% if active_poster.video_file.url %}{{ active_poster.video_file.url }}{% else %}#{% endif %}" type="video/mp4">
-                                <p>Your browser does not support the video tag.</p>
+                            <video controls preload="metadata" poster="">
+                                <source src="{{ active_poster.video_file.url }}" type="video/mp4">
+                                <source src="{{ active_poster.video_file.url }}" type="video/webm">
+                                <p class="video-error">Your browser does not support the video tag. <a href="{{ active_poster.video_file.url }}" target="_blank">Download the video</a></p>
                             </video>
                         </div>
                     </div>
@@ -138,26 +148,51 @@
             <!-- Upload Form for Staff/Admin -->
             {% if can_upload %}
                 <div class="poster-upload">
-                    <h3>Upload Content</h3>
+                    <h3><i class="fas fa-upload"></i> Upload Content</h3>
+                    <p class="upload-info">Upload a poster image, video file, or YouTube link to display in the Find Us section.</p>
+                    
+                    {% if poster_form.errors %}
+                        <div class="form-errors">
+                            {% for field, errors in poster_form.errors.items %}
+                                {% for error in errors %}
+                                    <p class="error-message"><i class="fas fa-exclamation-circle"></i> {{ error }}</p>
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
                     <form method="post" enctype="multipart/form-data" class="upload-form">
                         {% csrf_token %}
                         <div class="form-group">
-                            {{ poster_form.title.label_tag }}
+                            <label for="{{ poster_form.title.id_for_label }}"><i class="fas fa-heading"></i> {{ poster_form.title.label }}</label>
                             {{ poster_form.title }}
                         </div>
+                        
                         <div class="form-group">
-                            {{ poster_form.poster_image.label_tag }}
+                            <label for="{{ poster_form.poster_image.id_for_label }}"><i class="fas fa-image"></i> {{ poster_form.poster_image.label }}</label>
                             {{ poster_form.poster_image }}
+                            <small class="form-help">Supported formats: JPG, PNG, GIF (Max 5MB)</small>
                         </div>
+                        
+                        <div class="form-divider">OR</div>
+                        
                         <div class="form-group">
-                            {{ poster_form.video_file.label_tag }}
+                            <label for="{{ poster_form.video_file.id_for_label }}"><i class="fas fa-video"></i> {{ poster_form.video_file.label }}</label>
                             {{ poster_form.video_file }}
+                            <small class="form-help">Supported formats: MP4, WebM (Max 50MB)</small>
                         </div>
+                        
+                        <div class="form-divider">OR</div>
+                        
                         <div class="form-group">
-                            {{ poster_form.youtube_url.label_tag }}
+                            <label for="{{ poster_form.youtube_url.id_for_label }}"><i class="fab fa-youtube"></i> {{ poster_form.youtube_url.label }}</label>
                             {{ poster_form.youtube_url }}
+                            <small class="form-help">Example: https://www.youtube.com/watch?v=VIDEO_ID</small>
                         </div>
-                        <button type="submit" class="upload-button">Upload Content</button>
+                        
+                        <button type="submit" class="upload-button">
+                            <i class="fas fa-cloud-upload-alt"></i> Update Content
+                        </button>
                     </form>
                 </div>
             {% endif %}
@@ -610,9 +645,10 @@ img {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 3rem;
+        gap: 2rem;
         max-width: 800px;
         margin: 0 auto;
+        padding: 1rem;
     }
     
     .video-display {
@@ -622,17 +658,20 @@ img {
     
     .video-display h3 {
         color: var(--primary-color);
-        margin-bottom: 1.5rem;
-        font-size: 1.4rem;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
     }
     
     .video-container {
         position: relative;
         width: 100%;
+        max-width: 640px;
         aspect-ratio: 16/9;
         border-radius: 10px;
         overflow: hidden;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin: 0 auto;
+        background: #f8f9fa;
     }
     
     .video-container iframe,
@@ -643,19 +682,38 @@ img {
         width: 100%;
         height: 100%;
         border: none;
+        border-radius: 10px;
+    }
+    
+    .video-error {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #6c757d;
+        text-align: center;
+        padding: 1rem;
     }
     
     .poster-display {
         text-align: center;
-        max-width: 600px;
+        max-width: 500px;
+        width: 100%;
+    }
+    
+    .poster-wrapper {
+        position: relative;
+        width: 100%;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        background: #f8f9fa;
     }
     
     .poster-image {
         width: 100%;
-        max-width: 500px;
         height: auto;
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        display: block;
         transition: transform 0.3s ease;
     }
     
@@ -663,39 +721,134 @@ img {
         transform: scale(1.02);
     }
     
+    .image-error {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+        color: #6c757d;
+        font-size: 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 2px dashed #dee2e6;
+        border-radius: 10px;
+    }
+    
+    .image-error i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.5;
+    }
+    
+    .video-error {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+        color: #6c757d;
+        font-size: 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 2px dashed #dee2e6;
+        border-radius: 10px;
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .video-error i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.5;
+    }
+    
+    .file-name-display {
+        font-size: 0.8rem;
+        color: var(--primary-color);
+        margin-top: 0.25rem;
+        font-weight: 500;
+        padding: 0.25rem 0.5rem;
+        background: rgba(255, 107, 158, 0.1);
+        border-radius: 4px;
+        display: inline-block;
+    }
+    
     .poster-title {
         margin-top: 1rem;
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         font-weight: 600;
         color: var(--primary-color);
     }
     
     .no-poster {
         text-align: center;
-        padding: 3rem;
+        padding: 2rem;
         background: rgba(255, 107, 158, 0.05);
         border-radius: 10px;
         border: 2px dashed var(--border-color);
+        max-width: 500px;
+        margin: 0 auto;
     }
     
     .placeholder-icon {
-        font-size: 4rem;
+        font-size: 3rem;
         margin-bottom: 1rem;
+        display: block;
+    }
+    
+    @media (max-width: 480px) {
+        .no-poster {
+            padding: 1.5rem;
+        }
+        
+        .placeholder-icon {
+            font-size: 2rem;
+        }
     }
     
     .poster-upload {
-        background: rgba(255, 255, 255, 0.8);
+        background: var(--card-bg);
         padding: 1.5rem;
-        border-radius: 8px;
+        border-radius: 10px;
         border: 1px solid var(--border-color);
         width: 100%;
-        max-width: 350px;
+        max-width: 450px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
     
     .poster-upload h3 {
         color: var(--primary-color);
-        margin-bottom: 1.5rem;
+        margin-bottom: 0.5rem;
         text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .upload-info {
+        text-align: center;
+        color: var(--text-color);
+        opacity: 0.8;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.4;
+    }
+    
+    .form-errors {
+        background: #ffebee;
+        border: 1px solid #f44336;
+        border-radius: 5px;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .error-message {
+        color: #d32f2f;
+        margin: 0;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
     
     .upload-form .form-group {
@@ -703,55 +856,101 @@ img {
     }
     
     .upload-form label {
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
         margin-bottom: 0.5rem;
         font-weight: 600;
         color: var(--text-color);
+        font-size: 0.9rem;
     }
     
     .upload-form input, .upload-form select, .upload-form textarea {
         width: 100%;
-        padding: 0.5rem;
-        margin: 0.3rem 0;
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        font-size: 0.85rem;
+        padding: 0.6rem;
+        border: 2px solid var(--border-color);
+        border-radius: 6px;
         font-size: 0.9rem;
-        transition: border-color 0.3s ease;
+        transition: all 0.3s ease;
         background: var(--card-bg);
         color: var(--text-color);
+        box-sizing: border-box;
     }
     
     .upload-form input:focus {
         outline: none;
         border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(255, 107, 158, 0.1);
+    }
+    
+    .form-help {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--text-color);
+        opacity: 0.7;
+        margin-top: 0.25rem;
+        font-style: italic;
+    }
+    
+    .form-divider {
+        text-align: center;
+        margin: 1.5rem 0;
+        position: relative;
+        color: var(--text-color);
+        opacity: 0.6;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .form-divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: var(--border-color);
+        z-index: 1;
+    }
+    
+    .form-divider::after {
+        content: 'OR';
+        background: var(--card-bg);
+        padding: 0 1rem;
+        position: relative;
+        z-index: 2;
     }
     
     .upload-button {
         width: 100%;
-        background: var(--primary-color);
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
         color: white;
-        padding: 0.6rem;
+        padding: 0.75rem;
         border: none;
-        border-radius: 5px;
+        border-radius: 6px;
         font-size: 0.9rem;
         font-weight: 600;
         cursor: pointer;
-        transition: background-color 0.3s ease;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
     }
     
     .upload-button:hover {
-        background: var(--accent-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 107, 158, 0.3);
     }
     
     /* Responsive */
     @media (max-width: 768px) {
         .about-container {
-            padding: 0 1rem;
+            padding: 0 0.5rem;
         }
         
         .about-section {
-            padding: 1.25rem;
+            padding: 1rem;
         }
         
         .features-grid,
@@ -761,24 +960,196 @@ img {
         }
         
         .find-us-content {
-            padding: 0 1rem;
-            gap: 2rem;
+            padding: 0.5rem;
+            gap: 1.5rem;
+        }
+        
+        .video-display h3 {
+            font-size: 1rem;
         }
         
         .video-container {
-            margin: 0 1rem;
+            max-width: 100%;
         }
         
         .poster-upload {
-            padding: 1.5rem;
+            padding: 1rem;
+            max-width: 100%;
         }
         
-        .poster-image {
+        .upload-info {
+            font-size: 0.8rem;
+        }
+        
+        .form-divider {
+            margin: 1rem 0;
+        }
+        
+        .poster-display {
             max-width: 100%;
+        }
+        
+        .poster-title {
+            font-size: 1rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .find-us-content {
+            padding: 0.25rem;
+            gap: 1rem;
+        }
+        
+        .video-display h3 {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .poster-title {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        .image-error,
+        .video-error {
+            min-height: 150px;
+            font-size: 0.9rem;
+        }
+        
+        .image-error i {
+            font-size: 1.5rem;
+        }
+        
+        .poster-upload {
+            padding: 0.75rem;
+        }
+        
+        .upload-form label {
+            font-size: 0.8rem;
+        }
+        
+        .upload-form input {
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .upload-button {
+            padding: 0.6rem;
+            font-size: 0.8rem;
         }
     }
 </style>
 {% endblock %}
+
+<script>
+// Improve video and image loading
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle video loading errors
+    const videos = document.querySelectorAll('.video-container video');
+    videos.forEach(video => {
+        let errorShown = false;
+        
+        video.addEventListener('error', function() {
+            if (!errorShown) {
+                const container = this.closest('.video-container');
+                container.innerHTML = '<div class="video-error"><i class="fas fa-exclamation-triangle"></i><br>Video could not be loaded. Please try again later.</div>';
+                errorShown = true;
+            }
+        });
+        
+        video.addEventListener('loadstart', function() {
+            this.style.opacity = '0.5';
+        });
+        
+        video.addEventListener('canplay', function() {
+            this.style.opacity = '1';
+        });
+        
+        // Timeout fallback for slow loading
+        setTimeout(() => {
+            if (video.readyState === 0 && !errorShown) {
+                const container = video.closest('.video-container');
+                container.innerHTML = '<div class="video-error"><i class="fas fa-clock"></i><br>Video is taking too long to load. Please check your connection.</div>';
+                errorShown = true;
+            }
+        }, 10000); // 10 second timeout
+    });
+    
+    // Handle iframe loading
+    const iframes = document.querySelectorAll('.video-container iframe');
+    iframes.forEach(iframe => {
+        let loaded = false;
+        
+        iframe.addEventListener('load', function() {
+            this.style.opacity = '1';
+            loaded = true;
+        });
+        
+        // Set initial opacity
+        iframe.style.opacity = '0.5';
+        iframe.style.transition = 'opacity 0.3s ease';
+        
+        // Timeout fallback for iframe loading
+        setTimeout(() => {
+            if (!loaded) {
+                iframe.style.opacity = '1'; // Show anyway after timeout
+            }
+        }, 5000);
+    });
+    
+    // Handle poster image loading
+    const posterImages = document.querySelectorAll('.poster-image');
+    posterImages.forEach(img => {
+        let loaded = false;
+        
+        img.addEventListener('load', function() {
+            this.style.opacity = '1';
+            loaded = true;
+        });
+        
+        img.addEventListener('error', function() {
+            const wrapper = this.closest('.poster-wrapper');
+            if (wrapper) {
+                wrapper.innerHTML = '<div class="image-error"><i class="fas fa-image"></i><br>Image not available</div>';
+            }
+        });
+        
+        // Set initial opacity for smooth loading
+        img.style.opacity = '0.5';
+        img.style.transition = 'opacity 0.3s ease';
+        
+        // Timeout fallback
+        setTimeout(() => {
+            if (!loaded && img.complete) {
+                img.style.opacity = '1';
+            }
+        }, 3000);
+    });
+    
+    // Handle upload form file inputs
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    fileInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const fileName = this.files[0]?.name;
+            if (fileName) {
+                // Create or update file name display
+                let display = this.parentElement.querySelector('.file-name-display');
+                if (!display) {
+                    display = document.createElement('div');
+                    display.className = 'file-name-display';
+                    this.parentElement.appendChild(display);
+                }
+                display.textContent = `Selected: ${fileName}`;
+                display.style.fontSize = '0.8rem';
+                display.style.color = 'var(--primary-color)';
+                display.style.marginTop = '0.25rem';
+                display.style.fontWeight = '500';
+            }
+        });
+    });
+});
+</script>
+
 /* Header Responsive Fix */
 @media (max-width: 768px) {
     .container {

@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.db import models
 from .models import BuildingInfo, UserPreferences, FindUsPoster, HomePageContent
 from .forms import FindUsPosterForm, UserPreferencesForm
 from django.http import JsonResponse
@@ -130,8 +131,26 @@ def help_support(request):
     return render(request, 'help_support.html')
 
 def about(request):
-    # Get the active poster
+    # Get the active poster, or the most recent one with content
     active_poster = FindUsPoster.objects.filter(is_active=True).first()
+    
+    # If no active poster, get the most recent one with either image or video
+    if not active_poster:
+        active_poster = FindUsPoster.objects.filter(
+            models.Q(poster_image__isnull=False) | 
+            models.Q(video_file__isnull=False) | 
+            models.Q(youtube_url__isnull=False)
+        ).exclude(
+            models.Q(poster_image='') & 
+            models.Q(video_file='') & 
+            models.Q(youtube_url='')
+        ).order_by('-created_at').first()
+        
+        # Make it active if found
+        if active_poster:
+            FindUsPoster.objects.filter(is_active=True).update(is_active=False)
+            active_poster.is_active = True
+            active_poster.save()
     
     # Handle poster upload (only for staff/admin)
     poster_form = None
@@ -143,8 +162,10 @@ def about(request):
                 FindUsPoster.objects.filter(is_active=True).update(is_active=False)
                 # Save new poster
                 new_poster = poster_form.save()
-                messages.success(request, 'Poster updated successfully!')
+                messages.success(request, 'Content updated successfully!')
                 return redirect('about')
+            else:
+                messages.error(request, 'Please correct the errors below.')
         else:
             poster_form = FindUsPosterForm()
     
@@ -180,7 +201,7 @@ def register(request):
                     return JsonResponse({
                         'success': True,
                         'message': 'Registration successful! Welcome to FINDIT.',
-                        'redirect_url': '/home/'
+                        'redirect_url': '/'
                     })
                 messages.success(request, 'Registration successful! Welcome to FINDIT.')
                 return redirect('home')
@@ -205,7 +226,7 @@ def register(request):
                     return JsonResponse({
                         'success': True,
                         'message': 'Registration successful! Welcome to FINDIT.',
-                        'redirect_url': '/home/'
+                        'redirect_url': '/'
                     })
                 messages.success(request, 'Registration successful! Welcome to FINDIT.')
                 return redirect('home')

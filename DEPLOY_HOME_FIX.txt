@@ -1,0 +1,8 @@
+DEPLOY_HOME_FIX_2024_12_23
+
+FIXED: Home page URL routing issue
+- Added path('home/', views.home, name='home_dashboard') 
+- Updated registration redirects to use 'home_dashboard'
+- New users can now access dashboard at /home/
+
+STATUS: READY FOR DEPLOYMENT

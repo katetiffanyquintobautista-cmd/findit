@@ -1,0 +1,8 @@
+FORCE_DEPLOY_ROOT_URL_FIX_2024_12_23_FINAL
+
+CRITICAL FIX: Registration redirect to root URL
+- Changed '/home/' to '/' in redirect_url
+- Changed 'home_dashboard' to 'home' in redirect calls
+- This will work with existing deployment
+
+DEPLOY IMMEDIATELY

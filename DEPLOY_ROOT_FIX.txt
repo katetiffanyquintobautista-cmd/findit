@@ -1,0 +1,8 @@
+DEPLOY_ROOT_FIX_2024_12_23
+
+FIXED: Registration redirect to use root URL (/)
+- Changed redirect_url from '/home/' to '/'
+- Changed redirect from 'home_dashboard' to 'home'
+- New users will now go to root URL which works
+
+STATUS: READY FOR DEPLOYMENT

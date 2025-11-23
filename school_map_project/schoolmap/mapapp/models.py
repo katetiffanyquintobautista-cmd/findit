@@ -1,6 +1,7 @@
 import os
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 def user_profile_picture_path(instance, filename):
     # File will be uploaded to MEDIA_ROOT/profile_pics/user_<id>/<filename>
@@ -64,6 +65,17 @@ class FindUsPoster(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.created_at.strftime('%Y-%m-%d')}"
+    
+    def clean(self):
+        """Validate that at least one content type is provided"""
+        from django.core.exceptions import ValidationError
+        
+        if not any([self.poster_image, self.video_file, self.youtube_url]):
+            raise ValidationError('At least one content type (image, video file, or YouTube URL) must be provided.')
+    
+    def has_content(self):
+        """Check if this poster has any content"""
+        return bool(self.poster_image or self.video_file or self.youtube_url)
     
     def get_youtube_embed_id(self):
         """Extract YouTube video ID from URL for embedding"""
