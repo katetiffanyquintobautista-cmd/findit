@@ -4,5 +4,10 @@ set -o errexit
 pip install -r requirements.txt
 
 cd school_map_project/schoolmap
+
+# Remove all static files
+rm -rf staticfiles/*
+
+# Collect static files fresh
 python manage.py collectstatic --no-input --clear
 python manage.py migrate
