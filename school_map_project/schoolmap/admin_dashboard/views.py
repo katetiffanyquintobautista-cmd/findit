@@ -38,7 +38,7 @@ from django.core.files.base import ContentFile
 def dashboard(request):
     # Get recent user activity
     recent_users = User.objects.order_by('-date_joined')[:5]
-    recent_activities = ActivityLog.objects.select_related('user')[:10]
+    recent_activities = ActivityLog.objects.select_related('user').order_by('-timestamp')[:10]
     
     # Get building statistics
     total_buildings = BuildingInfo.objects.count()
@@ -50,6 +50,35 @@ def dashboard(request):
     ).count()
     active_users = User.objects.filter(is_active=True).count()
     
+    # Get today's statistics
+    today = timezone.now().date()
+    users_today = User.objects.filter(date_joined__date=today).count()
+    logins_today = ActivityLog.objects.filter(
+        action='user_login',
+        timestamp__date=today
+    ).count()
+    
+    # Get user growth data for the last 7 days
+    date_list = [today - timedelta(days=x) for x in range(6, -1, -1)]
+    user_growth_data = {
+        'labels': [date.strftime('%a') for date in date_list],
+        'data': [
+            User.objects.filter(date_joined__date=date).count() 
+            for date in date_list
+        ]
+    }
+    
+    # Get login activity for the last 7 days
+    login_activity_data = {
+        'labels': [date.strftime('%a') for date in date_list],
+        'data': [
+            ActivityLog.objects.filter(
+                action='user_login',
+                timestamp__date=date
+            ).count() for date in date_list
+        ]
+    }
+    
     context = {
         'active_page': 'dashboard',
         'recent_users': recent_users,
@@ -58,6 +87,10 @@ def dashboard(request):
         'total_users': total_users,
         'new_users_this_week': new_users_week,
         'active_users': active_users,
+        'users_today': users_today,
+        'logins_today': logins_today,
+        'user_growth_data': user_growth_data,
+        'login_activity_data': login_activity_data,
     }
     return render(request, 'admin_dashboard/dashboard.html', context)
 
@@ -332,3 +365,40 @@ def admin_profile(request):
         'MEDIA_URL': settings.MEDIA_URL,
     }
     return render(request, 'admin_dashboard/profile.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.is_staff, login_url='home')
+def dashboard_api(request):
+    """API endpoint for live dashboard updates"""
+    today = timezone.now().date()
+    
+    # Get real-time statistics
+    total_users = User.objects.count()
+    active_users = User.objects.filter(is_active=True).count()
+    users_today = User.objects.filter(date_joined__date=today).count()
+    logins_today = ActivityLog.objects.filter(
+        action='user_login',
+        timestamp__date=today
+    ).count()
+    
+    # Get recent activities
+    recent_activities = ActivityLog.objects.select_related('user').order_by('-timestamp')[:5]
+    activities_data = []
+    for activity in recent_activities:
+        activities_data.append({
+            'action': activity.get_action_display(),
+            'description': activity.description,
+            'timestamp': activity.timestamp.strftime('%H:%M:%S'),
+            'user': activity.user.username if activity.user else 'System'
+        })
+    
+    data = {
+        'total_users': total_users,
+        'active_users': active_users,
+        'users_today': users_today,
+        'logins_today': logins_today,
+        'recent_activities': activities_data,
+        'last_updated': timezone.now().strftime('%H:%M:%S')
+    }
+    
+    return JsonResponse(data)

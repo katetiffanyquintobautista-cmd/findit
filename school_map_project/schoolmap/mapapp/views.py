@@ -175,8 +175,21 @@ def register(request):
                 log_activity(user, 'user_registered', f'New student {user.username} registered', request)
                 # Login user automatically
                 login(request, user)
+                # Return JSON response for AJAX
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': True,
+                        'message': 'Registration successful! Welcome to FINDIT.',
+                        'redirect_url': '/home/'
+                    })
                 messages.success(request, 'Registration successful! Welcome to FINDIT.')
                 return redirect('home')
+            else:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False,
+                        'errors': form.errors
+                    })
         elif 'teacher_submit' in request.POST:
             form = TeacherRegistrationForm(request.POST)
             if form.is_valid():
@@ -187,8 +200,21 @@ def register(request):
                 log_activity(user, 'user_registered', f'New teacher {user.username} registered', request)
                 # Login user automatically
                 login(request, user)
+                # Return JSON response for AJAX
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': True,
+                        'message': 'Registration successful! Welcome to FINDIT.',
+                        'redirect_url': '/home/'
+                    })
                 messages.success(request, 'Registration successful! Welcome to FINDIT.')
                 return redirect('home')
+            else:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False,
+                        'errors': form.errors
+                    })
     
     student_form = StudentRegistrationForm()
     teacher_form = TeacherRegistrationForm()

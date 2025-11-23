@@ -1,0 +1,1 @@
+web: gunicorn --pythonpath school_map_project/schoolmap schoolmap.wsgi --log-file -

@@ -1,4 +1,6 @@
 {% load static %}
+{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -363,12 +365,22 @@
                 field.type = 'text';
                 icon.classList.remove('fa-eye');
                 icon.classList.add('fa-eye-slash');
+                icon.title = 'Hide password';
             } else {
                 field.type = 'password';
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');
+                icon.title = 'Show password';
             }
         }
+        
+        // Add tooltips to password toggle icons
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.password-toggle').forEach(icon => {
+                icon.title = 'Show password';
+                icon.setAttribute('aria-label', 'Toggle password visibility');
+            });
+        });
     </script>
 </body>
 </html>

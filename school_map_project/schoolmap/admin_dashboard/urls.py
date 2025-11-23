@@ -5,6 +5,7 @@ app_name = 'admin_dashboard'
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
+    path('api/dashboard/', views.dashboard_api, name='dashboard_api'),
     path('users/', views.user_management, name='user_management'),
     path('users/toggle-status/<int:user_id>/', views.toggle_user_status, name='toggle_user_status'),
     path('users/delete/<int:user_id>/', views.delete_user, name='delete_user'),

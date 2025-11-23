@@ -596,6 +596,87 @@
         </div>
     </div>
     
+    <!-- Success Popup Modal -->
+    <div id="successModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fas fa-check-circle" style="color: #4CAF50; font-size: 3rem; margin-bottom: 1rem;"></i>
+                <h2>Registration Successful!</h2>
+            </div>
+            <div class="modal-body">
+                <p id="successMessage">Welcome to FINDIT! Your account has been created successfully.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="continueBtn" class="modal-btn">Continue to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header h2 {
+            color: #4CAF50;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .modal-body p {
+            color: #666;
+            margin: 1rem 0;
+            line-height: 1.5;
+        }
+        
+        .modal-btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+    </style>
+
     <script>
         function switchTab(tabName) {
             // Hide all tab contents
@@ -642,32 +723,94 @@
             }
         });
         
-        // Form validation for student registration
+        // Enhanced form submission with AJAX for success popup
+        function submitForm(formId, submitType) {
+            const form = document.getElementById(formId);
+            const formData = new FormData(form);
+            
+            // Show loading state
+            const submitBtn = form.querySelector('.register-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Creating Account...';
+            submitBtn.disabled = true;
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccessModal(data.message, data.redirect_url);
+                } else {
+                    // Handle form errors
+                    displayFormErrors(data.errors);
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+        
+        function showSuccessModal(message, redirectUrl) {
+            document.getElementById('successMessage').textContent = message;
+            document.getElementById('successModal').style.display = 'flex';
+            
+            document.getElementById('continueBtn').onclick = function() {
+                window.location.href = redirectUrl;
+            };
+        }
+        
+        function displayFormErrors(errors) {
+            // Clear previous errors
+            document.querySelectorAll('.error').forEach(el => el.remove());
+            
+            // Display new errors
+            for (const [field, messages] of Object.entries(errors)) {
+                const fieldElement = document.querySelector(`[name="${field}"]`);
+                if (fieldElement) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'error';
+                    errorDiv.textContent = messages.join(', ');
+                    fieldElement.parentNode.appendChild(errorDiv);
+                }
+            }
+        }
+        
+        // Form validation and submission
         document.getElementById('studentRegisterForm')?.addEventListener('submit', function(e) {
-            const password = document.getElementById('studentPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
+            e.preventDefault();
+            const password = document.getElementById('id_password1').value;
+            const confirmPassword = document.getElementById('id_password2').value;
             
             if (password !== confirmPassword) {
-                e.preventDefault();
                 alert('Passwords do not match!');
                 return false;
             }
             
-            // Add additional validation if needed
+            submitForm('studentRegisterForm', 'student');
         });
         
-        // Form validation for teacher registration
         document.getElementById('teacherRegisterForm')?.addEventListener('submit', function(e) {
-            const password = document.getElementById('teacherPassword').value;
-            const confirmPassword = document.getElementById('teacherConfirmPassword').value;
+            e.preventDefault();
+            const password = document.getElementById('teacher_password1').value;
+            const confirmPassword = document.getElementById('teacher_password2').value;
             
             if (password !== confirmPassword) {
-                e.preventDefault();
                 alert('Passwords do not match!');
                 return false;
             }
             
-            // Add additional validation if needed
+            submitForm('teacherRegisterForm', 'teacher');
         });
         
         function togglePassword(fieldId) {
@@ -678,12 +821,21 @@
                 field.type = 'text';
                 icon.classList.remove('fa-eye');
                 icon.classList.add('fa-eye-slash');
+                icon.title = 'Hide password';
             } else {
                 field.type = 'password';
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');
+                icon.title = 'Show password';
             }
         }
+        
+        // Add tooltips to password toggle icons
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.password-toggle').forEach(icon => {
+                icon.title = 'Show password';
+            });
+        });
     </script>
 </body>
 </html>

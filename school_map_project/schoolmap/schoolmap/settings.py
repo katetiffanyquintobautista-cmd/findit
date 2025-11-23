@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-)m(bv)qzo$*=^^72^oej9!vgidkphx2ub8gmp+wqydp=uad%b-
 import os
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']  # Update this with your domain
+ALLOWED_HOSTS = ['*', '.onrender.com']  # Update this with your domain
 
 
 # Authentication settings
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

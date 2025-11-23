@@ -98,7 +98,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <div class="text-xs text-uppercase mb-1">Active Users</div>
-                            <h5 class="mb-0">{{ active_users }}</h5>
+                            <h5 class="mb-0" id="active-users-count">{{ active_users }}</h5>
                             <div class="mt-2">
                                 <span class="badge bg-success bg-opacity-10 text-success">
                                     <i class="fas fa-circle me-1"></i> Active
@@ -113,8 +113,93 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Today's Stats -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card card-stats h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs text-uppercase mb-1">Today's Registrations</div>
+                            <h5 class="mb-0" id="users-today-count">{{ users_today }}</h5>
+                            <div class="mt-2">
+                                <span class="badge bg-info bg-opacity-10 text-info">
+                                    <i class="fas fa-calendar-day me-1"></i> Today
+                                </span>
+                                <small class="text-muted ms-1">new users</small>
+                            </div>
+                        </div>
+                        <div class="icon icon-shape bg-info bg-opacity-10 text-info rounded-3">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Today's Logins -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card card-stats h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs text-uppercase mb-1">Today's Logins</div>
+                            <h5 class="mb-0" id="logins-today-count">{{ logins_today }}</h5>
+                            <div class="mt-2">
+                                <span class="badge bg-success bg-opacity-10 text-success">
+                                    <i class="fas fa-sign-in-alt me-1"></i> Active
+                                </span>
+                                <small class="text-muted ms-1">sessions</small>
+                            </div>
+                        </div>
+                        <div class="icon icon-shape bg-success bg-opacity-10 text-success rounded-3">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- Live Analytics Charts -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">User Growth (7 Days)</h5>
+                        <div class="live-indicator">
+                            <span class="badge bg-success bg-opacity-10 text-success">
+                                <i class="fas fa-circle pulse"></i> Live
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="userGrowthChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Login Activity (7 Days)</h5>
+                        <div class="live-indicator">
+                            <span class="badge bg-success bg-opacity-10 text-success">
+                                <i class="fas fa-circle pulse"></i> Live
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="loginActivityChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="row g-4">
         <!-- Recent Users -->
         <div class="col-12 col-xl-8">
@@ -170,9 +255,17 @@
                                         {% endif %}
                                     </td>
                                     <td class="text-end">
-                                        <button class="btn btn-sm btn-light">
-                                            <i class="fas fa-ellipsis-v"></i>
-                                        </button>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li><a class="dropdown-item" href="#">View Profile</a></li>
+                                                <li><a class="dropdown-item" href="#">Edit User</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-danger" href="#">Deactivate</a></li>
+                                            </ul>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -260,7 +353,15 @@
             </div>
         </div>
         <div class="card-body">
-            <div class="timeline">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="live-indicator">
+                    <span class="badge bg-success bg-opacity-10 text-success">
+                        <i class="fas fa-circle pulse"></i> Live Updates
+                    </span>
+                </div>
+                <small class="text-muted">Last updated: <span id="last-updated">{{ "now"|date:"H:i:s" }}</span></small>
+            </div>
+            <div class="timeline" id="activity-timeline">
                 {% for activity in recent_activities %}
                 <div class="timeline-item">
                     <div class="timeline-badge 
@@ -302,10 +403,189 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    
+    .live-indicator {
+        display: flex;
+        align-items: center;
+    }
+</style>
 <script>
-    // Initialize any dashboard-specific JavaScript here
+    let userGrowthChart, loginActivityChart;
+    
+    // Initialize charts
     document.addEventListener('DOMContentLoaded', function() {
-        // You can add dashboard-specific JavaScript here
+        initializeCharts();
+        startLiveUpdates();
+    });
+    
+    function initializeCharts() {
+        // User Growth Chart
+        const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
+        userGrowthChart = new Chart(userGrowthCtx, {
+            type: 'line',
+            data: {
+                labels: {{ user_growth_data.labels|safe }},
+                datasets: [{
+                    label: 'New Users',
+                    data: {{ user_growth_data.data|safe }},
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Login Activity Chart
+        const loginActivityCtx = document.getElementById('loginActivityChart').getContext('2d');
+        loginActivityChart = new Chart(loginActivityCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ login_activity_data.labels|safe }},
+                datasets: [{
+                    label: 'Logins',
+                    data: {{ login_activity_data.data|safe }},
+                    backgroundColor: 'rgba(40, 167, 69, 0.8)',
+                    borderColor: '#28a745',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function startLiveUpdates() {
+        // Update every 30 seconds
+        setInterval(updateDashboard, 30000);
+    }
+    
+    function updateDashboard() {
+        fetch('{% url "admin_dashboard:dashboard_api" %}')
+            .then(response => response.json())
+            .then(data => {
+                // Update statistics
+                document.getElementById('active-users-count').textContent = data.active_users;
+                document.getElementById('users-today-count').textContent = data.users_today;
+                document.getElementById('logins-today-count').textContent = data.logins_today;
+                document.getElementById('last-updated').textContent = data.last_updated;
+                
+                // Update recent activities
+                updateRecentActivities(data.recent_activities);
+                
+                // Add visual feedback for update
+                showUpdateIndicator();
+            })
+            .catch(error => {
+                console.error('Error updating dashboard:', error);
+            });
+    }
+    
+    function updateRecentActivities(activities) {
+        const timeline = document.getElementById('activity-timeline');
+        if (!activities || activities.length === 0) return;
+        
+        // Clear existing activities
+        timeline.innerHTML = '';
+        
+        // Add new activities
+        activities.forEach(activity => {
+            const timelineItem = document.createElement('div');
+            timelineItem.className = 'timeline-item';
+            
+            let badgeClass = 'bg-secondary';
+            let iconClass = 'fa-info';
+            
+            if (activity.action.toLowerCase().includes('login')) {
+                badgeClass = 'bg-primary';
+                iconClass = 'fa-sign-in-alt';
+            } else if (activity.action.toLowerCase().includes('building')) {
+                badgeClass = 'bg-success';
+                iconClass = 'fa-building';
+            }
+            
+            timelineItem.innerHTML = `
+                <div class="timeline-badge ${badgeClass}">
+                    <i class="fas ${iconClass}"></i>
+                </div>
+                <div class="timeline-content">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="mb-1">${activity.action}</h6>
+                        <small class="text-muted">${activity.timestamp}</small>
+                    </div>
+                    <p class="mb-0 text-muted">${activity.description}</p>
+                </div>
+            `;
+            
+            timeline.appendChild(timelineItem);
+        });
+    }
+    
+    function showUpdateIndicator() {
+        // Add a subtle flash effect to indicate update
+        const indicators = document.querySelectorAll('.live-indicator');
+        indicators.forEach(indicator => {
+            indicator.style.opacity = '0.5';
+            setTimeout(() => {
+                indicator.style.opacity = '1';
+            }, 200);
+        });
+    }
+    
+    // Add click handlers for quick actions
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.timeline-item')) {
+            // Add click animation
+            const item = e.target.closest('.timeline-item');
+            item.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                item.style.transform = 'scale(1)';
+            }, 150);
+        }
     });
 </script>
 {% endblock %}
