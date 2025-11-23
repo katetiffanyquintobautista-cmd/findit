@@ -337,10 +337,23 @@ def admin_profile(request):
     if request.method == 'POST':
         # Handle profile picture upload
         if 'profile_picture' in request.FILES:
-            preferences.profile_picture = request.FILES['profile_picture']
-            preferences.save()
-            messages.success(request, 'Profile picture uploaded successfully!')
-            return redirect('admin_dashboard:profile')
+            try:
+                # Delete old profile picture if it exists
+                if preferences.profile_picture:
+                    preferences.profile_picture.delete(save=False)
+                
+                # Save new profile picture
+                uploaded_file = request.FILES['profile_picture']
+                # Validate file size (max 5MB)
+                if uploaded_file.size > 5 * 1024 * 1024:
+                    messages.error(request, 'File size should not exceed 5MB.')
+                else:
+                    preferences.profile_picture = uploaded_file
+                    preferences.save()
+                    messages.success(request, 'Profile picture updated successfully!')
+                    return redirect('admin_dashboard:profile')
+            except Exception as e:
+                messages.error(request, f'Error uploading profile picture: {str(e)}')
         
         # Handle basic profile updates
         first_name = request.POST.get('first_name')
@@ -358,6 +371,8 @@ def admin_profile(request):
         messages.success(request, 'Profile updated successfully!')
         return redirect('admin_dashboard:profile')
     
+    # Ensure MEDIA_URL is properly set
+    from django.conf import settings
     context = {
         'active_page': 'profile',
         'user': user,
