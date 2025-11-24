@@ -11,9 +11,22 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+import sys
+from django.core.management.utils import get_random_secret_key
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Cloudinary Configuration
+try:
+    import cloudinary
+    import cloudinary.uploader
+    import cloudinary.api
+    from cloudinary_storage.storage import MediaCloudinaryStorage, StaticHashedCloudinaryStorage
+    CLOUDINARY_AVAILABLE = True
+except ImportError:
+    CLOUDINARY_AVAILABLE = False
 
 
 # Quick-start development settings - unsuitable for production
@@ -43,8 +56,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',  # Must come before 'django.contrib.staticfiles'
     'django.contrib.staticfiles',
-    'cloudinary_storage',
     'cloudinary',
     'mapapp',
     'admin_dashboard.apps.AdminDashboardConfig',
@@ -125,9 +138,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Additional locations of static files
 STATICFILES_DIRS = [
@@ -140,49 +152,36 @@ STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
-
-
-# Cloudinary Configuration
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
-
-# Cloudinary configuration
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'your-cloud-name'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', 'your-api-key'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'your-api-secret'),
-    'SECURE': True,
-    'MEDIA_TAG': 'media',
-    'PREFIX': f"media/{os.environ.get('RENDER', 'local')}",
-}
-
-# Initialize Cloudinary
-cloudinary.config(
-    cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
-    api_key=CLOUDINARY_STORAGE['API_KEY'],
-    api_secret=CLOUDINARY_STORAGE['API_SECRET'],
-    secure=CLOUDINARY_STORAGE['SECURE']
-)
+# Add Cloudinary finder if available
+if CLOUDINARY_AVAILABLE:
+    STATICFILES_FINDERS.append('cloudinary_storage.finders.CloudinaryStaticFinder')
 
 # Media files (User uploaded files)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # File storage settings
-if not DEBUG or os.environ.get('USE_CLOUDINARY', 'False').lower() == 'true':
-    # Use Cloudinary in production or when explicitly enabled
+if not DEBUG and CLOUDINARY_AVAILABLE:
+    # Cloudinary configuration for production
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
+        'API_KEY': os.environ.get('CLOUDINARY_API_KEY', ''),
+        'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
+        'SECURE': True,
+        'STATICFILES_MANIFEST_ROOT': os.path.join(BASE_DIR, 'staticfiles'),
+    }
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
+    
     # Add CORS settings for Cloudinary if needed
     CORS_ALLOWED_ORIGINS = [
         'https://res.cloudinary.com',
         'https://*.cloudinary.com',
     ]
 else:
-    # Use local file storage in development
+    # Local file storage for development
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-    
-    # Ensure media directory exists
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     os.makedirs(MEDIA_ROOT, exist_ok=True)
 
 # Default primary key field type
