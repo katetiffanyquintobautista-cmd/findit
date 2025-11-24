@@ -147,27 +147,43 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 
+# Cloudinary configuration
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'your-cloud-name'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', 'your-api-key'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', 'your-api-secret'),
+    'SECURE': True,
+    'MEDIA_TAG': 'media',
+    'PREFIX': f"media/{os.environ.get('RENDER', 'local')}",
+}
+
+# Initialize Cloudinary
 cloudinary.config(
-    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME', 'your-cloud-name'),
-    api_key=os.environ.get('CLOUDINARY_API_KEY', 'your-api-key'),
-    api_secret=os.environ.get('CLOUDINARY_API_SECRET', 'your-api-secret')
+    cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
+    api_key=CLOUDINARY_STORAGE['API_KEY'],
+    api_secret=CLOUDINARY_STORAGE['API_SECRET'],
+    secure=CLOUDINARY_STORAGE['SECURE']
 )
 
 # Media files (User uploaded files)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Use Cloudinary for production, local storage for development
-if DEBUG:
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-else:
+# File storage settings
+if not DEBUG or os.environ.get('USE_CLOUDINARY', 'False').lower() == 'true':
+    # Use Cloudinary in production or when explicitly enabled
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-    # Ensure media files work in production
-    CLOUDINARY_STORAGE = {
-        'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'demo'),
-        'API_KEY': os.environ.get('CLOUDINARY_API_KEY', ''),
-        'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
-    }
+    # Add CORS settings for Cloudinary if needed
+    CORS_ALLOWED_ORIGINS = [
+        'https://res.cloudinary.com',
+        'https://*.cloudinary.com',
+    ]
+else:
+    # Use local file storage in development
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    
+    # Ensure media directory exists
+    os.makedirs(MEDIA_ROOT, exist_ok=True)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
