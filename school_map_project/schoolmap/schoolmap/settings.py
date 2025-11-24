@@ -131,7 +131,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Additional locations of static files
 STATICFILES_DIRS = [
-    BASE_DIR / 'mapapp' / 'static',
+    os.path.join(BASE_DIR, 'mapapp/static'),
 ]
 
 # Static files finders

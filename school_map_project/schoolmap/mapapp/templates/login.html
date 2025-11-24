@@ -41,22 +41,24 @@
         }
         
         .logo {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 1rem;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 1.5rem;
             flex-shrink: 0;
-            background: none;
+            background: white;
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 20px;
+            padding: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
         
         .logo img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
-            border-radius: 50%;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
         }
         
         .logo-text {
@@ -316,7 +318,7 @@
     <div class="left-section">
         <div class="logo-container">
             <div class="logo">
-                <img src="{% static 'img/logo.png' %}" alt="FINDIT Logo">
+                <img src="{% static 'mapapp/img/logo.png' %}" alt="FINDIT Logo">
             </div>
             <h1 class="logo-text">FINDIT</h1>
         </div>
