@@ -19,14 +19,18 @@ from django.core.management.utils import get_random_secret_key
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Cloudinary Configuration
-try:
-    import cloudinary
-    import cloudinary.uploader
-    import cloudinary.api
-    from cloudinary_storage.storage import MediaCloudinaryStorage, StaticHashedCloudinaryStorage
-    CLOUDINARY_AVAILABLE = True
-except ImportError:
-    CLOUDINARY_AVAILABLE = False
+CLOUDINARY_AVAILABLE = False  # Default to False
+
+# Only try to import cloudinary if environment variables are set
+if all(os.environ.get(var) for var in ['CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET']):
+    try:
+        import cloudinary
+        import cloudinary.uploader
+        import cloudinary.api
+        from cloudinary_storage.storage import MediaCloudinaryStorage, StaticHashedCloudinaryStorage
+        CLOUDINARY_AVAILABLE = True
+    except ImportError:
+        pass
 
 
 # Quick-start development settings - unsuitable for production
@@ -56,8 +60,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'cloudinary_storage',  # Must come before 'django.contrib.staticfiles'
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles',  # This line must be present
+    'cloudinary_storage',
     'cloudinary',
     'mapapp',
     'admin_dashboard.apps.AdminDashboardConfig',
@@ -65,6 +69,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add WhiteNoise here
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -97,10 +102,13 @@ WSGI_APPLICATION = 'schoolmap.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': str(BASE_DIR / 'db.sqlite3'),
     }
 }
 
@@ -159,6 +167,9 @@ if CLOUDINARY_AVAILABLE:
 # Media files (User uploaded files)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Configure WhiteNoise
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # File storage settings
 if not DEBUG and CLOUDINARY_AVAILABLE:
