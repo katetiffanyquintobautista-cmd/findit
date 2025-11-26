@@ -28,11 +28,10 @@ services:
         value: '${RENDER_EXTERNAL_HOSTNAME} .onrender.com'
       
       # Database (PostgreSQL on Render)
-databases:
-  - name: schoolmap-db
-    databaseName: schoolmap
-    user: schoolmap_user
-    plan: free
+      - key: DATABASE_URL
+        fromDatabase:
+          name: schoolmap-db
+          property: connectionString
       
       # Cloudinary Configuration (update these with your actual credentials)
       - key: CLOUDINARY_CLOUD_NAME
@@ -64,9 +63,9 @@ databases:
     autoDeploy: true
     region: oregon
 
-# Uncomment and configure if you need a database
-# databases:
-#   - name: schoolmap-db
-#     databaseName: schoolmap
-#     user: schoolmap_user
-#     plan: free  # or 'starter' or 'standard' for production
+# Database configuration
+databases:
+  - name: schoolmap-db
+    databaseName: schoolmap
+    user: schoolmap_user
+    plan: free
