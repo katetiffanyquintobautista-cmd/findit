@@ -310,8 +310,8 @@ function resetMapView() {
     }
 }
 
-// Global map variable
-let map;
+// Global map variable (reuse existing instance if script evaluated twice)
+let map = window.campusMap || null;
 
 // Make functions and map globally available
 window.highlightBuilding = highlightBuilding;
@@ -336,6 +336,9 @@ function initMap() {
     }
     
     console.log('Map elements found, setting up event listeners...');
+
+    // Store reference globally so other scripts can access without redeclaring
+    window.campusMap = campusMap;
     
     // Use the shared buildings data
     const buildings = window.buildingsData || [];

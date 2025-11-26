@@ -1,11 +1,11 @@
 from django.contrib import admin
-from .models import BuildingInfo, FindUsPoster, HomePageContent, HomePageContent
+from .models import BuildingInfo, FindUsPoster, HomePageContent
 
 @admin.register(BuildingInfo)
 class BuildingInfoAdmin(admin.ModelAdmin):
-    list_display = ['name', 'operating_hours', 'updated_at']
-    search_fields = ['name']
-    list_filter = ['updated_at']
+    list_display = ['name', 'code', 'floor_count', 'is_active', 'updated_at']
+    search_fields = ['name', 'code']
+    list_filter = ['is_active', 'updated_at']
 
 @admin.register(FindUsPoster)
 class FindUsPosterAdmin(admin.ModelAdmin):
@@ -39,27 +39,19 @@ class FindUsPosterAdmin(admin.ModelAdmin):
 
 @admin.register(HomePageContent)
 class HomePageContentAdmin(admin.ModelAdmin):
-    list_display = ['site_title', 'is_active', 'updated_at']
-    list_filter = ['is_active', 'announcement_active', 'updated_at']
-    search_fields = ['site_title', 'welcome_title']
-    
+    list_display = ['section', 'title', 'is_active', 'updated_at']
+    list_filter = ['is_active', 'updated_at']
+    search_fields = ['section', 'title', 'content']
     fieldsets = (
-        ('Main Content', {
-            'fields': ('site_title', 'welcome_title', 'welcome_subtitle', 'welcome_description')
+        ('Section Info', {
+            'fields': ('section', 'title', 'is_active')
         }),
-        ('Media', {
-            'fields': ('logo_image', 'background_image')
+        ('Content', {
+            'fields': ('content',)
         }),
-        ('Announcements', {
-            'fields': ('announcement_text', 'announcement_active')
-        }),
-        ('Settings', {
-            'fields': ('is_active',)
-        })
     )
-    
+
     def save_model(self, request, obj, form, change):
         if obj.is_active:
-            # Deactivate other home page contents
             HomePageContent.objects.exclude(pk=obj.pk).update(is_active=False)
         super().save_model(request, obj, form, change)

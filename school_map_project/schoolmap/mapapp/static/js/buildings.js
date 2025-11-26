@@ -80,28 +80,31 @@ details: buildDetails(['All Grades'], ['Cafeteria'], 'Secondary cafeteria near e
 
 // Simple search and zoom function using Leaflet
 window.performSearch = (searchTerm) => {
-const map = window.campusMap; // your Leaflet map instance
-const markerLayer = window.buildingMarkers || L.layerGroup().addTo(map);
+    const map = window.campusMap; // your Leaflet map instance
+    const markerLayer = window.buildingMarkers || L.layerGroup().addTo(map);
 
-```
-const result = window.buildings.find(b => b.name.toLowerCase() === searchTerm.toLowerCase());
-if (!result) {
-    alert('Building not found.');
-    return;
-}
+    const result = window.buildings.find(
+        (b) => b.name.toLowerCase() === searchTerm.toLowerCase()
+    );
+    if (!result) {
+        alert('Building not found.');
+        return;
+    }
 
-// Clear existing markers
-markerLayer.clearLayers();
+    // Clear existing markers
+    markerLayer.clearLayers();
 
-const marker = L.marker([result.coordinates[0], result.coordinates[1]], {
-    icon: L.icon({
-        iconUrl: '/static/icons/pink-marker.png', // your pink icon path
-        iconSize: [30, 30],
-        iconAnchor: [15, 30]
+    L.marker([result.coordinates[0], result.coordinates[1]], {
+        icon: L.icon({
+            iconUrl: '/static/icons/pink-marker.png', // your pink icon path
+            iconSize: [30, 30],
+            iconAnchor: [15, 30]
+        })
     })
-}).addTo(markerLayer)
-  .bindPopup(`<strong>${result.name}</strong><br>${result.description}`)
-  .openPopup();
+        .addTo(markerLayer)
+        .bindPopup(`<strong>${result.name}</strong><br>${result.description}`)
+        .openPopup();
 
-map.setView([result.coordinates[0], result.coordinates[1]], 19); // zoom in
-window.buildingMarkers = markerLayer;
+    map.setView([result.coordinates[0], result.coordinates[1]], 19); // zoom in
+    window.buildingMarkers = markerLayer;
+};

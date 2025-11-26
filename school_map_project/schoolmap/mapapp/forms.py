@@ -1,6 +1,6 @@
 from django import forms
+from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 from .models import UserPreferences, FindUsPoster
@@ -21,6 +21,9 @@ class UserPreferencesForm(forms.ModelForm):
         self.fields['theme'].widget.choices = UserPreferences.THEME_CHOICES
         self.fields['font_size'].widget.choices = UserPreferences.FONT_SIZE_CHOICES
         self.fields['dashboard_layout'].widget.choices = UserPreferences.LAYOUT_CHOICES
+
+CustomUser = get_user_model()
+
 
 class StudentRegistrationForm(UserCreationForm):
     email = forms.EmailField(
@@ -62,7 +65,7 @@ class StudentRegistrationForm(UserCreationForm):
     )
     
     class Meta:
-        model = User
+        model = CustomUser
         fields = ('username', 'email', 'password1', 'password2')
         widgets = {
             'username': forms.TextInput(attrs={
@@ -74,7 +77,7 @@ class StudentRegistrationForm(UserCreationForm):
     
     def clean_username(self):
         username = self.cleaned_data.get('username')
-        if User.objects.filter(username=username).exists():
+        if CustomUser.objects.filter(username=username).exists():
             raise ValidationError("A user with that username already exists.")
         return username
     
@@ -82,6 +85,9 @@ class StudentRegistrationForm(UserCreationForm):
         user = super().save(commit=False)
         user.email = self.cleaned_data['email']
         user.first_name = self.cleaned_data['full_name']
+        user.is_student = True
+        user.lrn = self.cleaned_data['lrn']
+        user.grade_section = self.cleaned_data['grade_section']
         if commit:
             user.save()
         return user
@@ -145,7 +151,7 @@ class TeacherRegistrationForm(UserCreationForm):
     )
     
     class Meta:
-        model = User
+        model = CustomUser
         fields = ('username', 'email', 'password1', 'password2')
         widgets = {
             'username': forms.TextInput(attrs={
@@ -157,7 +163,7 @@ class TeacherRegistrationForm(UserCreationForm):
     
     def clean_username(self):
         username = self.cleaned_data.get('username')
-        if User.objects.filter(username=username).exists():
+        if CustomUser.objects.filter(username=username).exists():
             raise ValidationError("A user with that username already exists.")
         return username
     
@@ -165,6 +171,11 @@ class TeacherRegistrationForm(UserCreationForm):
         user = super().save(commit=False)
         user.email = self.cleaned_data['email']
         user.first_name = self.cleaned_data['full_name']
+        user.is_teacher = True
+        user.employee_id = self.cleaned_data['faculty_id']
+        user.department = self.cleaned_data['department']
+        # Store teaching level in grade_section for now; adjust if a dedicated field is added later
+        user.grade_section = self.cleaned_data['grade_level']
         if commit:
             user.save()
         return user

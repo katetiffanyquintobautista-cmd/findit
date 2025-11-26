@@ -48,8 +48,9 @@ ALLOWED_HOSTS = ['*', '.onrender.com']  # Update this with your domain
 
 
 # Authentication settings
+AUTH_USER_MODEL = 'mapapp.CustomUser'
 LOGIN_URL = 'login'  # URL name of your login view
-LOGIN_REDIRECT_URL = 'admin_dashboard:dashboard'  # Redirect after login
+LOGIN_REDIRECT_URL = 'home'  # Redirect after login
 LOGOUT_REDIRECT_URL = 'landing'  # Redirect after logout
 
 # Application definition

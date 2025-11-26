@@ -1,30 +1,51 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, get_user_model
+from types import SimpleNamespace
+
 from django.contrib import messages
 from django.db import models
-from .models import BuildingInfo, UserPreferences, FindUsPoster, HomePageContent
+from .models import BuildingInfo, UserPreferences, FindUsPoster, HomePageContent, ActivityLog
+
 from .forms import FindUsPosterForm, UserPreferencesForm
 from django.http import JsonResponse
 from .utils import log_activity
+
+def _serialize_form_errors(form):
+    error_data = form.errors.get_json_data()
+    return {
+        field: [error.get('message') for error in messages]
+        for field, messages in error_data.items()
+    }
+
+def _build_home_content(record=None):
+    defaults = {
+        'site_title': "FINDIT - School Map",
+        'welcome_title': "School Campus Map",
+        'welcome_subtitle': "Welcome back, {username}!",
+        'welcome_description': "Navigate your campus with ease - Find buildings, rooms, and more. Use the interactive map to explore facilities and get directions.",
+        'announcement_text': '',
+        'announcement_active': False,
+        'logo_image': None,
+        'background_image': None,
+    }
+
+    if record:
+        for key in list(defaults.keys()):
+            value = getattr(record, key, None)
+            if value not in [None, '']:
+                defaults[key] = value
+
+    return SimpleNamespace(**defaults)
 
 @login_required
 def home(request):
     # Get user preferences
     preferences, created = UserPreferences.objects.get_or_create(user=request.user)
     
-    # Get active home page content
-    home_content = HomePageContent.objects.filter(is_active=True).first()
-    
-    # Create default content if none exists
-    if not home_content:
-        home_content = HomePageContent.objects.create(
-            site_title="FINDIT - School Map",
-            welcome_title="School Campus Map",
-            welcome_subtitle="Welcome back, {username}!",
-            welcome_description="Navigate your campus with ease - Find buildings, rooms, and more. Use the interactive map to explore facilities and get directions.",
-            is_active=True
-        )
+    # Get active home page content (falls back to defaults if none exist)
+    home_content_record = HomePageContent.objects.filter(is_active=True).first()
+    home_content = _build_home_content(home_content_record)
     
     # Process welcome subtitle to replace {username} placeholder
     welcome_subtitle = home_content.welcome_subtitle
@@ -86,36 +107,34 @@ def schedule(request):
 
 @login_required
 def settings(request):
-    user = request.user
-    preferences, created = UserPreferences.objects.get_or_create(user=user)
-    
+    preferences, _ = UserPreferences.objects.get_or_create(user=request.user)
+
     if request.method == 'POST':
         form = UserPreferencesForm(request.POST, instance=preferences)
         if form.is_valid():
             form.save()
-            
-            # Handle AJAX requests
+
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
                     'success': True,
                     'message': 'Settings saved successfully!',
                     'theme': preferences.theme,
                     'accent_color': preferences.accent_color,
-                    'font_size': preferences.font_size
+                    'font_size': preferences.font_size,
                 })
-            
+
             messages.success(request, 'Settings saved successfully!')
             return redirect('settings')
-        else:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Please correct the errors below.',
-                    'errors': form.errors
-                })
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'message': 'Please correct the errors below.',
+                'errors': _serialize_form_errors(form)
+            })
     else:
         form = UserPreferencesForm(instance=preferences)
-    
+
     context = {
         'form': form,
         'preferences': preferences,
@@ -177,6 +196,8 @@ def about(request):
     return render(request, 'about.html', context)
 
 def landing(request):
+    if request.user.is_authenticated:
+        return redirect('home')
     return render(request, 'landing.html')
 
 def register(request):
@@ -201,7 +222,7 @@ def register(request):
                     return JsonResponse({
                         'success': True,
                         'message': 'Registration successful! Welcome to FINDIT.',
-                        'redirect_url': '/'
+                        'redirect_url': '/home/'
                     })
                 messages.success(request, 'Registration successful! Welcome to FINDIT.')
                 return redirect('home')
@@ -209,7 +230,7 @@ def register(request):
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return JsonResponse({
                         'success': False,
-                        'errors': form.errors
+                        'errors': _serialize_form_errors(form)
                     })
         elif 'teacher_submit' in request.POST:
             form = TeacherRegistrationForm(request.POST)
@@ -226,7 +247,7 @@ def register(request):
                     return JsonResponse({
                         'success': True,
                         'message': 'Registration successful! Welcome to FINDIT.',
-                        'redirect_url': '/'
+                        'redirect_url': '/home/'
                     })
                 messages.success(request, 'Registration successful! Welcome to FINDIT.')
                 return redirect('home')
@@ -249,9 +270,17 @@ def register(request):
 
 def login_view(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
+        identifier = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=identifier, password=password)
+        if user is None and identifier:
+            UserModel = get_user_model()
+            try:
+                account = UserModel.objects.get(username=identifier)
+                user = authenticate(request, username=account.email, password=password)
+            except UserModel.DoesNotExist:
+                user = None
         if user is not None:
             login(request, user)
             log_activity(user, 'user_login', f'User {user.username} logged in', request)
@@ -269,3 +298,28 @@ def logout_view(request):
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
     return redirect('landing')
+
+@login_required
+def user_notifications(request, user_id):
+    """Return recent activity logs as notifications for the given user."""
+    if request.user.id != user_id and not request.user.is_staff:
+        return JsonResponse({'success': False, 'message': 'Not authorized'}, status=403)
+
+    logs = (
+        ActivityLog.objects
+        .filter(user_id=user_id)
+        .order_by('-created_at')
+    )[:10]
+
+    notifications = [
+        {
+            'id': log.id,
+            'title': log.get_action_display() or 'Activity Update',
+            'body': log.details or '',
+            'created_at': log.created_at.isoformat(),
+            'is_read': True,
+        }
+        for log in logs
+    ]
+
+    return JsonResponse({'success': True, 'notifications': notifications})
