@@ -3,9 +3,10 @@
 
 services:
   - type: web
-    name: schoolmap  # Update this to match your service name
+    name: schoolmap
     env: python
-    buildCommand: |-
+    runtime: python3.10.10
+    buildCommand: |
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
       python manage.py migrate
@@ -27,10 +28,11 @@ services:
         value: '${RENDER_EXTERNAL_HOSTNAME} .onrender.com'
       
       # Database (PostgreSQL on Render)
-      - key: DATABASE_URL
-        fromDatabase:
-          name: schoolmap-db  # Update this to your database name
-          property: connectionString
+databases:
+  - name: schoolmap-db
+    databaseName: schoolmap
+    user: schoolmap_user
+    plan: free
       
       # Cloudinary Configuration (update these with your actual credentials)
       - key: CLOUDINARY_CLOUD_NAME
@@ -56,24 +58,11 @@ services:
       - key: SENDGRID_API_KEY
         value: your_sendgrid_api_key_here
 
-    plan: free  # or 'starter' or 'standard' for production
+    plan: free
     numInstances: 1
-    healthCheckPath: /  # Update this to a health check endpoint if you have one
+    healthCheckPath: /
     autoDeploy: true
-    region: oregon  # Choose the region closest to your users
-    
-    # Build and deployment settings
-    buildCommand: |
-      pip install -r requirements.txt
-      python manage.py collectstatic --noinput
-      python manage.py migrate
-    
-    # Static files configuration
-    staticPublishing:
-      - source: /static
-        destination: /static
-      - source: /media
-        destination: /media
+    region: oregon
 
 # Uncomment and configure if you need a database
 # databases:
