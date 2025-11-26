@@ -21,6 +21,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.static import serve
 from django.views.generic.base import RedirectView
+from mapapp.views import landing
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,8 +29,9 @@ urlpatterns = [
     # Include Django's auth URLs but point them to our custom login view
     path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(next_page='landing'), name='logout'),
-    # Direct root path to landing page
-    path('', RedirectView.as_view(url='/landing/', permanent=False), name='root_redirect'),
+    # Root path directly to landing page
+    path('', landing, name='root_landing'),
+    # Include mapapp URLs
     path('', include('mapapp.urls')),
 ]
 
